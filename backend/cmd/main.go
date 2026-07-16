@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
+	"github.com/malyshenko-developer/fruit-store/internal/app"
 	"github.com/malyshenko-developer/fruit-store/internal/config"
 	"github.com/malyshenko-developer/fruit-store/internal/infra/db/postgres"
 )
@@ -28,4 +29,11 @@ func main() {
 	defer pool.Close()
 
 	log.Println("successfully connected to database")
+
+	server := app.NewServer()
+
+	log.Printf("starting server on port %s", cfg.Port)
+	if err := server.Router().Run(":" + cfg.Port); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }
