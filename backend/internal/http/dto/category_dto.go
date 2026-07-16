@@ -8,8 +8,8 @@ type CategoryResponse struct {
 	Slug string `json:"slug"`
 }
 
-func CategoryToResponse(c *model.Category) CategoryResponse {
-	return CategoryResponse{
+func CategoryToResponse(c *model.Category) *CategoryResponse {
+	return &CategoryResponse{
 		ID:   c.ID,
 		Name: c.Name,
 		Slug: c.Slug,

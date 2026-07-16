@@ -33,9 +33,12 @@ func main() {
 	log.Println("successfully connected to database")
 
 	categoryRepo := repository.NewCategoryRepository(pool)
-	categoryService := service.NewCategoryService(categoryRepo)
+	productRepo := repository.NewProductRepository(pool)
 
-	server := app.NewServer(categoryService)
+	categoryService := service.NewCategoryService(categoryRepo)
+	productService := service.NewProductService(productRepo)
+
+	server := app.NewServer(categoryService, productService)
 
 	log.Printf("starting server on port %s", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {

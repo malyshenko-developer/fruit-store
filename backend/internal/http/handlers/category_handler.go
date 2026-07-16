@@ -21,7 +21,7 @@ func (h *CategoryHandler) List(c *gin.Context) {
 		return
 	}
 
-	response := make([]dto.CategoryResponse, 0, len(categories))
+	response := make([]*dto.CategoryResponse, 0, len(categories))
 	for _, cat := range categories {
 		response = append(response, dto.CategoryToResponse(cat))
 	}
