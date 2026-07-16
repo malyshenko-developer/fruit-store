@@ -6,14 +6,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/malyshenko-developer/fruit-store/internal/http/handlers"
+	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
 
 type Server struct {
-	router *gin.Engine
+	router          *gin.Engine
+	categoryService service.CategoryService
 }
 
-func NewServer() *Server {
-	s := &Server{}
+func NewServer(categoryService service.CategoryService) *Server {
+	s := &Server{categoryService: categoryService}
 	s.setupRouter()
 	return s
 }
@@ -31,6 +34,13 @@ func (s *Server) setupRouter() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	categoryHandlers := handlers.NewCategoryHandler(s.categoryService)
+
+	v1 := r.Group("/v1")
+	{
+		v1.GET("/categories", categoryHandlers.List)
+	}
 
 	s.router = r
 }

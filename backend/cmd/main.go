@@ -8,6 +8,8 @@ import (
 	"github.com/malyshenko-developer/fruit-store/internal/app"
 	"github.com/malyshenko-developer/fruit-store/internal/config"
 	"github.com/malyshenko-developer/fruit-store/internal/infra/db/postgres"
+	"github.com/malyshenko-developer/fruit-store/internal/repository"
+	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
 
 func main() {
@@ -30,7 +32,10 @@ func main() {
 
 	log.Println("successfully connected to database")
 
-	server := app.NewServer()
+	categoryRepo := repository.NewCategoryRepository(pool)
+	categoryService := service.NewCategoryService(categoryRepo)
+
+	server := app.NewServer(categoryService)
 
 	log.Printf("starting server on port %s", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {
