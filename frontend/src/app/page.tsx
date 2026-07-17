@@ -1,10 +1,17 @@
 import { getCategories, CategoryList } from "@/entities/category";
 import { getProducts, ProductList } from "@/entities/product";
 
-export default async function Home() {
+interface Props {
+    searchParams: Promise<{ category_id?: string }>;
+}
+
+export default async function Home({ searchParams }: Props) {
+    const { category_id } = await searchParams;
+    const categoryId = category_id ? Number(category_id) : undefined;
+
     const [categories, products] = await Promise.all([
         getCategories(),
-        getProducts(),
+        getProducts(categoryId),
     ]);
 
     return (

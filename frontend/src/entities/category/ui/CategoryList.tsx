@@ -1,4 +1,5 @@
 import type { Category } from "../model/types";
+import Link from "next/link";
 
 interface Props {
     categories: Category[];
@@ -6,10 +7,12 @@ interface Props {
 
 export function CategoryList({ categories }: Props) {
     return (
-        <ul className="space-y-2">
+        <ul className="flex gap-3">
             {categories.map((category) => (
-                <li key={category.id} className="border p-3 rounded">
-                    {category.name} ({category.slug})
+                <li key={category.id} className="border p-3 rounded hover:bg-blue-500">
+                    <Link href={`/?category_id=${category.id}`} className="px-3 py-1 rounded">
+                        {category.name}
+                    </Link>
                 </li>
             ))}
         </ul>
