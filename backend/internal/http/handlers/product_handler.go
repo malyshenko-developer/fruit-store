@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -59,6 +60,7 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 			writeNotFound(c, "product not found")
 			return
 		}
+		log.Printf("failed to fetch product: %v", err)
 		writeInternalError(c, "failed to fetch product")
 		return
 	}

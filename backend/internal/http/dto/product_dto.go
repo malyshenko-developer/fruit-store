@@ -3,14 +3,14 @@ package dto
 import "github.com/malyshenko-developer/fruit-store/internal/model"
 
 type ProductResponse struct {
-	ID          int64   `json:"id"`
-	CategoryID  int64   `json:"category_id"`
-	Name        string  `json:"name"`
-	Price       float64 `json:"price"`
-	Description string  `json:"description"`
-	ImageURL    string  `json:"image_url"`
-	Stock       int     `json:"stock"`
-	Color       *string `json:"color"`
+	ID          int64                  `json:"id"`
+	CategoryID  int64                  `json:"category_id"`
+	Name        string                 `json:"name"`
+	Price       float64                `json:"price"`
+	Description string                 `json:"description"`
+	ImageURL    string                 `json:"image_url"`
+	Stock       int                    `json:"stock"`
+	Attributes  map[string]interface{} `json:"attributes"`
 }
 
 func ProductToResponse(p *model.Product) *ProductResponse {
@@ -22,6 +22,6 @@ func ProductToResponse(p *model.Product) *ProductResponse {
 		Description: p.Description,
 		ImageURL:    p.ImageURL,
 		Stock:       p.Stock,
-		Color:       p.Color,
+		Attributes:  p.Attributes,
 	}
 }

@@ -8,5 +8,5 @@ type Product struct {
 	Description string
 	ImageURL    string
 	Stock       int
-	Color       *string
+	Attributes  map[string]interface{}
 }
