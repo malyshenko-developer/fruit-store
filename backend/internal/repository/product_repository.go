@@ -20,7 +20,7 @@ func NewProductRepository(pool *pgxpool.Pool) *ProductRepository {
 
 func (r *ProductRepository) GetAll(ctx context.Context, categoryID *int64) ([]*model.Product, error) {
 	const q = `
-		SELECT id, category_id, name, price, description, image_url, stock
+		SELECT id, category_id, name, price, description, image_url, stock, color
 		FROM products
 		WHERE ($1::bigint IS NULL OR category_id = $1)
 		ORDER BY id`
@@ -34,7 +34,7 @@ func (r *ProductRepository) GetAll(ctx context.Context, categoryID *int64) ([]*m
 	var products []*model.Product
 	for rows.Next() {
 		var p model.Product
-		if err := rows.Scan(&p.ID, &p.CategoryID, &p.Name, &p.Price, &p.Description, &p.ImageURL, &p.Stock); err != nil {
+		if err := rows.Scan(&p.ID, &p.CategoryID, &p.Name, &p.Price, &p.Description, &p.ImageURL, &p.Stock, &p.Color); err != nil {
 			return nil, err
 		}
 		products = append(products, &p)
@@ -45,12 +45,12 @@ func (r *ProductRepository) GetAll(ctx context.Context, categoryID *int64) ([]*m
 
 func (r *ProductRepository) GetByID(ctx context.Context, id int64) (*model.Product, error) {
 	const q = `
-		SELECT id, category_id, name, price, description, image_url, stock
+		SELECT id, category_id, name, price, description, image_url, stock, color
 		FROM products
 		WHERE id = $1`
 
 	var p model.Product
-	err := r.pool.QueryRow(ctx, q, id).Scan(&p.ID, &p.CategoryID, &p.Name, &p.Price, &p.Description, &p.ImageURL, &p.Stock)
+	err := r.pool.QueryRow(ctx, q, id).Scan(&p.ID, &p.CategoryID, &p.Name, &p.Price, &p.Description, &p.ImageURL, &p.Stock, &p.Color)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperr.ErrNotFound

@@ -10,6 +10,7 @@ type ProductResponse struct {
 	Description string  `json:"description"`
 	ImageURL    string  `json:"image_url"`
 	Stock       int     `json:"stock"`
+	Color       *string `json:"color"`
 }
 
 func ProductToResponse(p *model.Product) *ProductResponse {
@@ -21,5 +22,6 @@ func ProductToResponse(p *model.Product) *ProductResponse {
 		Description: p.Description,
 		ImageURL:    p.ImageURL,
 		Stock:       p.Stock,
+		Color:       p.Color,
 	}
 }
