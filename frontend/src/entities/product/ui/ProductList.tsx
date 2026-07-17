@@ -1,7 +1,7 @@
-import type { Product } from "../model/types";
+import type { ProductListItem  } from "../model/types";
 
 interface Props {
-    products: Product[];
+    products: ProductListItem[];
 }
 
 export function ProductList({ products }: Props) {
@@ -11,7 +11,7 @@ export function ProductList({ products }: Props) {
                 <div key={product.id} className="border rounded p-4">
                     <h3 className="font-semibold">{product.name}</h3>
                     <p className="text-sm text-gray-500">{product.description}</p>
-                    <p className="mt-2 font-bold">${product.price}</p>
+                    <p className="mt-2 font-bold">From ${product.min_price}</p>
                 </div>
             ))}
         </div>
