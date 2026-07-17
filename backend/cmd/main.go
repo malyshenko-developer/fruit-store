@@ -8,6 +8,7 @@ import (
 	"github.com/malyshenko-developer/fruit-store/internal/app"
 	"github.com/malyshenko-developer/fruit-store/internal/config"
 	"github.com/malyshenko-developer/fruit-store/internal/infra/db/postgres"
+	"github.com/malyshenko-developer/fruit-store/internal/logger"
 	"github.com/malyshenko-developer/fruit-store/internal/repository"
 	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
@@ -22,6 +23,8 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
+	appLogger := logger.New(cfg.LogLevel)
+
 	ctx := context.Background()
 
 	pool, err := postgres.NewPool(ctx, cfg.DatabaseURL)
@@ -30,7 +33,7 @@ func main() {
 	}
 	defer pool.Close()
 
-	log.Println("successfully connected to database")
+	appLogger.Info("successfully connected to database")
 
 	categoryRepo := repository.NewCategoryRepository(pool)
 	productRepo := repository.NewProductRepository(pool)
@@ -38,9 +41,9 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepo)
 	productService := service.NewProductService(productRepo)
 
-	server := app.NewServer(categoryService, productService)
+	server := app.NewServer(categoryService, productService, appLogger)
 
-	log.Printf("starting server on port %s", cfg.Port)
+	appLogger.Info("starting server", "port", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}

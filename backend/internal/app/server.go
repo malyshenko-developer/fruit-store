@@ -2,11 +2,13 @@ package app
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/malyshenko-developer/fruit-store/internal/http/handlers"
+	"github.com/malyshenko-developer/fruit-store/internal/http/middleware"
 	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
 
@@ -14,10 +16,15 @@ type Server struct {
 	router          *gin.Engine
 	categoryService service.CategoryService
 	productService  service.ProductService
+	logger          *slog.Logger
 }
 
-func NewServer(categoryService service.CategoryService, productService service.ProductService) *Server {
-	s := &Server{categoryService: categoryService, productService: productService}
+func NewServer(categoryService service.CategoryService, productService service.ProductService, logger *slog.Logger) *Server {
+	s := &Server{
+		categoryService: categoryService,
+		productService:  productService,
+		logger:          logger,
+	}
 	s.setupRouter()
 	return s
 }
@@ -28,7 +35,7 @@ func (s *Server) Router() *gin.Engine {
 
 func (s *Server) setupRouter() {
 	r := gin.New()
-	r.Use(gin.Logger())
+	r.Use(middleware.RequestLogger(s.logger))
 	r.Use(gin.Recovery())
 	r.Use(withTimeout(30 * time.Second))
 
@@ -36,8 +43,8 @@ func (s *Server) setupRouter() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	categoryHandlers := handlers.NewCategoryHandler(s.categoryService)
-	productHandlers := handlers.NewProductHandler(s.productService)
+	categoryHandlers := handlers.NewCategoryHandler(s.categoryService, s.logger)
+	productHandlers := handlers.NewProductHandler(s.productService, s.logger)
 
 	v1 := r.Group("/v1")
 	{

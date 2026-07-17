@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +13,11 @@ import (
 
 type ProductHandler struct {
 	service service.ProductService
+	logger  *slog.Logger
 }
 
-func NewProductHandler(service service.ProductService) *ProductHandler {
-	return &ProductHandler{service: service}
+func NewProductHandler(service service.ProductService, logger *slog.Logger) *ProductHandler {
+	return &ProductHandler{service: service, logger: logger}
 }
 
 func (h *ProductHandler) List(c *gin.Context) {
@@ -33,6 +34,7 @@ func (h *ProductHandler) List(c *gin.Context) {
 
 	products, err := h.service.GetAll(c.Request.Context(), categoryID)
 	if err != nil {
+		h.logger.Error("failed to fetch products", "error", err, "category_id", categoryID)
 		writeInternalError(c, "failed to fetch products")
 		return
 	}
@@ -60,7 +62,7 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 			writeNotFound(c, "product not found")
 			return
 		}
-		log.Printf("failed to fetch product: %v", err)
+		h.logger.Error("failed to fetch product", "error", err, "product_id", id)
 		writeInternalError(c, "failed to fetch product")
 		return
 	}
