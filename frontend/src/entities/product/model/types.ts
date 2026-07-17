@@ -6,5 +6,5 @@ export interface Product {
     description: string;
     image_url: string;
     stock: number;
-    color: string | null;
+    attributes: Record<string, unknown>;
 }
