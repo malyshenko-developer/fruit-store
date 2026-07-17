@@ -6,3 +6,7 @@ export async function getProducts(categoryId?: number): Promise<Product[]> {
     const query = categoryId ? `?category_id=${categoryId}` : "";
     return apiFetch<Product[]>(`/products${query}`);
 }
+
+export async function getProductById(id: number): Promise<Product> {
+    return apiFetch<Product>(`/products/${id}`);
+}
