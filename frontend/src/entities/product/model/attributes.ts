@@ -1,4 +1,4 @@
-import {Product} from "./types";
+import {ProductVariant} from "./types";
 
 function getString(attrs: Record<string, unknown>, key: string): string | null {
     const value = attrs[key];
@@ -11,11 +11,11 @@ export interface IphoneAttributes {
     connectivity: string | null;
 }
 
-export function getIphoneAttributes(product: Product): IphoneAttributes {
+export function getIphoneAttributes(variant: ProductVariant): IphoneAttributes {
     return {
-        color: getString(product.attributes, "color"),
-        storage: getString(product.attributes, "storage"),
-        connectivity: getString(product.attributes, "connectivity"),
+        color: getString(variant.attributes, "color"),
+        storage: getString(variant.attributes, "storage"),
+        connectivity: getString(variant.attributes, "connectivity"),
     }
 }
 
@@ -26,11 +26,11 @@ export interface MacAttributes {
     storage: string | null;
 }
 
-export function getMacAttributes(product: Product): MacAttributes {
+export function getMacAttributes(variant: ProductVariant): MacAttributes {
     return {
-        color: getString(product.attributes, "color"),
-        chip: getString(product.attributes, "chip"),
-        ram: getString(product.attributes, "ram"),
-        storage: getString(product.attributes, "storage"),
+        color: getString(variant.attributes, "color"),
+        chip: getString(variant.attributes, "chip"),
+        ram: getString(variant.attributes, "ram"),
+        storage: getString(variant.attributes, "storage"),
     }
 }
