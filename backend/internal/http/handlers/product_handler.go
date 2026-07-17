@@ -39,9 +39,9 @@ func (h *ProductHandler) List(c *gin.Context) {
 		return
 	}
 
-	response := make([]*dto.ProductResponse, 0, len(products))
+	response := make([]*dto.ProductListItemResponse, 0, len(products))
 	for _, p := range products {
-		response = append(response, dto.ProductToResponse(p))
+		response = append(response, dto.ProductListItemToResponse(p))
 	}
 
 	writeOK(c, response)
@@ -67,5 +67,5 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	writeOK(c, dto.ProductToResponse(product))
+	writeOK(c, dto.ProductDetailToResponse(product))
 }
