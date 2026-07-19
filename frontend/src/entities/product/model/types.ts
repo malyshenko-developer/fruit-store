@@ -1,10 +1,12 @@
 export interface ProductListItem {
-    id: number;
+    variant_id: number;
+    product_id: number;
     category_id: number;
     name: string;
     description: string;
     image_url: string;
-    min_price: number;
+    price: number;
+    attributes: Record<string, unknown>;
 }
 
 export interface ProductVariant {

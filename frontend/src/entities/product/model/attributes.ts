@@ -1,4 +1,6 @@
-import {ProductVariant} from "./types";
+interface HasAttributes {
+    attributes: Record<string, unknown>;
+}
 
 function getString(attrs: Record<string, unknown>, key: string): string | null {
     const value = attrs[key];
@@ -11,7 +13,7 @@ export interface IphoneAttributes {
     connectivity: string | null;
 }
 
-export function getIphoneAttributes(variant: ProductVariant): IphoneAttributes {
+export function getIphoneAttributes(variant: HasAttributes): IphoneAttributes {
     return {
         color: getString(variant.attributes, "color"),
         storage: getString(variant.attributes, "storage"),
@@ -26,7 +28,7 @@ export interface MacAttributes {
     storage: string | null;
 }
 
-export function getMacAttributes(variant: ProductVariant): MacAttributes {
+export function getMacAttributes(variant: HasAttributes): MacAttributes {
     return {
         color: getString(variant.attributes, "color"),
         chip: getString(variant.attributes, "chip"),
