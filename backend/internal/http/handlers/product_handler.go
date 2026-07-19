@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/malyshenko-developer/fruit-store/internal/apperr"
 	"github.com/malyshenko-developer/fruit-store/internal/http/dto"
+	"github.com/malyshenko-developer/fruit-store/internal/model"
 	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
 
@@ -32,9 +33,15 @@ func (h *ProductHandler) List(c *gin.Context) {
 		categoryID = &parsed
 	}
 
-	products, err := h.service.GetAll(c.Request.Context(), categoryID)
+	params := model.ListProductsParams{
+		CategoryID: categoryID,
+		SortBy:     c.Query("sort_by"),
+		Order:      c.Query("order"),
+	}
+
+	products, err := h.service.GetAll(c.Request.Context(), params)
 	if err != nil {
-		h.logger.Error("failed to fetch products", "error", err, "category_id", categoryID)
+		h.logger.Error("failed to fetch products", "error", err, "params", params)
 		writeInternalError(c, "failed to fetch products")
 		return
 	}

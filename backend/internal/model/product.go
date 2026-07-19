@@ -9,10 +9,18 @@ type Product struct {
 }
 
 type ProductListItem struct {
-	ID          int64
+	VariantID   int64
+	ProductID   int64
 	CategoryID  int64
 	Name        string
 	Description string
 	ImageURL    string
-	MinPrice    float64
+	Price       float64
+	Attributes  map[string]interface{}
+}
+
+type ListProductsParams struct {
+	CategoryID *int64
+	SortBy     string
+	Order      string
 }

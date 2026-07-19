@@ -6,22 +6,26 @@ import (
 )
 
 type ProductListItemResponse struct {
-	ID          int64   `json:"id"`
-	CategoryID  int64   `json:"category_id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	ImageURL    string  `json:"image_url"`
-	MinPrice    float64 `json:"min_price"`
+	VariantID   int64                  `json:"variant_id"`
+	ProductID   int64                  `json:"product_id"`
+	CategoryID  int64                  `json:"category_id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	ImageURL    string                 `json:"image_url"`
+	Price       float64                `json:"price"`
+	Attributes  map[string]interface{} `json:"attributes"`
 }
 
 func ProductListItemToResponse(p *model.ProductListItem) *ProductListItemResponse {
 	return &ProductListItemResponse{
-		ID:          p.ID,
+		VariantID:   p.VariantID,
+		ProductID:   p.ProductID,
 		CategoryID:  p.CategoryID,
 		Name:        p.Name,
 		Description: p.Description,
 		ImageURL:    p.ImageURL,
-		MinPrice:    p.MinPrice,
+		Price:       p.Price,
+		Attributes:  p.Attributes,
 	}
 }
 

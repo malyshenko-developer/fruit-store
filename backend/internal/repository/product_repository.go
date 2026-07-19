@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,38 +20,55 @@ func NewProductRepository(pool *pgxpool.Pool) *ProductRepository {
 	return &ProductRepository{pool: pool}
 }
 
-func (r *ProductRepository) GetAll(ctx context.Context, categoryID *int64) ([]*model.ProductListItem, error) {
-	const q = `
+func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProductsParams) ([]*model.ProductListItem, error) {
+	orderColumn := "pv.price"
+	if params.SortBy == "created_at" {
+		orderColumn = "p.created_at"
+	}
+
+	orderDirection := "ASC"
+	if params.Order == "desc" {
+		orderDirection = "DESC"
+	}
+
+	q := fmt.Sprintf(`
 		SELECT
+			pv.id,
 			p.id,
 			p.category_id,
 			p.name,
 			p.description,
-			p.image_url,
-			MIN(pv.price) AS min_price
-		FROM products p
-		JOIN product_variants pv ON pv.product_id = p.id
-		WHERE ($1::bigint IS NULL OR category_id = $1)
-		GROUP BY p.id
-		ORDER BY p.id`
+			COALESCE(pv.image_url, p.image_url),
+			pv.price,
+			pv.attributes
+		FROM product_variants pv
+		JOIN products p ON p.id = pv.product_id
+		WHERE ($1::bigint IS NULL OR p.category_id = $1)
+		ORDER BY %s %s`, orderColumn, orderDirection)
 
-	rows, err := r.pool.Query(ctx, q, categoryID)
+	rows, err := r.pool.Query(ctx, q, params.CategoryID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var products []*model.ProductListItem
+	var items []*model.ProductListItem
 	for rows.Next() {
-		var p model.ProductListItem
-		if err := rows.Scan(&p.ID, &p.CategoryID, &p.Name, &p.Description, &p.ImageURL, &p.MinPrice); err != nil {
+		var item model.ProductListItem
+		var rawAttributes []byte
+
+		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.ImageURL, &item.Price, &rawAttributes); err != nil {
 			return nil, err
 		}
 
-		products = append(products, &p)
+		if err := json.Unmarshal(rawAttributes, &item.Attributes); err != nil {
+			return nil, err
+		}
+
+		items = append(items, &item)
 	}
 
-	return products, rows.Err()
+	return items, rows.Err()
 }
 
 func (r *ProductRepository) GetByID(ctx context.Context, id int64) (*model.Product, error) {
