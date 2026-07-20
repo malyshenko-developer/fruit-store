@@ -16,6 +16,13 @@ var allowedOrders = map[string]bool{
 	"desc": true,
 }
 
+var AllowedAttributeFilters = map[string]bool{
+	"color":        true,
+	"storage":      true,
+	"chip":         true,
+	"connectivity": true,
+}
+
 type ProductWithVariants struct {
 	Product  *model.Product
 	Variants []*model.ProductVariant

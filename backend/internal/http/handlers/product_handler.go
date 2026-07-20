@@ -33,10 +33,18 @@ func (h *ProductHandler) List(c *gin.Context) {
 		categoryID = &parsed
 	}
 
+	attributes := make(map[string]string)
+	for key := range service.AllowedAttributeFilters {
+		if value := c.Query(key); value != "" {
+			attributes[key] = value
+		}
+	}
+
 	params := model.ListProductsParams{
 		CategoryID: categoryID,
 		SortBy:     c.Query("sort_by"),
 		Order:      c.Query("order"),
+		Attributes: attributes,
 	}
 
 	products, err := h.service.GetAll(c.Request.Context(), params)

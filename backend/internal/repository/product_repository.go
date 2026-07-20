@@ -31,6 +31,15 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 		orderDirection = "DESC"
 	}
 
+	var attributesFilter interface{}
+	if len(params.Attributes) > 0 {
+		attrs, err := json.Marshal(params.Attributes)
+		if err != nil {
+			return nil, err
+		}
+		attributesFilter = attrs
+	}
+
 	q := fmt.Sprintf(`
 		SELECT
 			pv.id,
@@ -44,9 +53,10 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 		FROM product_variants pv
 		JOIN products p ON p.id = pv.product_id
 		WHERE ($1::bigint IS NULL OR p.category_id = $1)
+			AND ($2::jsonb IS NULL OR pv.attributes @> $2::jsonb)
 		ORDER BY %s %s`, orderColumn, orderDirection)
 
-	rows, err := r.pool.Query(ctx, q, params.CategoryID)
+	rows, err := r.pool.Query(ctx, q, params.CategoryID, attributesFilter)
 	if err != nil {
 		return nil, err
 	}
