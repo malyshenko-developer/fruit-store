@@ -130,3 +130,49 @@ func (r *ProductRepository) GetVariantsByProductID(ctx context.Context, productI
 
 	return variants, rows.Err()
 }
+
+func (r *ProductRepository) GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error) {
+	const attrsQuery = `
+		SELECT kv.key, array_agg(DISTINCT kv.value) 
+		FROM product_variants pv
+		JOIN products p ON p.id = pv.product_id
+		CROSS JOIN LATERAL jsonb_each_text(pv.attributes) AS kv(key, value)
+		WHERE ($1::bigint IS NULL OR p.category_id = $1)
+		GROUP BY kv.key`
+
+	rows, err := r.pool.Query(ctx, attrsQuery, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	attributes := make(map[string][]string)
+	for rows.Next() {
+		var key string
+		var values []string
+		if err := rows.Scan(&key, &values); err != nil {
+			return nil, err
+		}
+		attributes[key] = values
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	const priceQuery = `
+		SELECT COALESCE(MIN(pv.price), 0), COALESCE(MAX(pv.price), 0)
+		FROM product_variants pv
+		JOIN products p ON p.id = pv.product_id
+		WHERE ($1::bigint IS NULL OR p.category_id = $1)`
+
+	var minPrice, maxPrice float64
+	if err := r.pool.QueryRow(ctx, priceQuery, categoryID).Scan(&minPrice, &maxPrice); err != nil {
+		return nil, err
+	}
+
+	return &model.ProductFilters{
+		Attributes: attributes,
+		MinPrice:   minPrice,
+		MaxPrice:   maxPrice,
+	}, nil
+}

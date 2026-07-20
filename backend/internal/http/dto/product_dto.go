@@ -69,3 +69,23 @@ func ProductDetailToResponse(p *service.ProductWithVariants) *ProductDetailRespo
 		Variants:    variants,
 	}
 }
+
+type PriceRangeResponse struct {
+	Min float64 `json:"min"`
+	Max float64 `json:"max"`
+}
+
+type ProductFiltersResponse struct {
+	Attributes map[string][]string `json:"attributes"`
+	PriceRange PriceRangeResponse  `json:"price_range"`
+}
+
+func ProductFiltersToResponse(f *model.ProductFilters) *ProductFiltersResponse {
+	return &ProductFiltersResponse{
+		Attributes: f.Attributes,
+		PriceRange: PriceRangeResponse{
+			Min: f.MinPrice,
+			Max: f.MaxPrice,
+		},
+	}
+}

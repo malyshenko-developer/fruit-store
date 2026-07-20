@@ -32,11 +32,13 @@ type ProductRepository interface {
 	GetAll(ctx context.Context, params model.ListProductsParams) ([]*model.ProductListItem, error)
 	GetByID(ctx context.Context, id int64) (*model.Product, error)
 	GetVariantsByProductID(ctx context.Context, productID int64) ([]*model.ProductVariant, error)
+	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
 }
 
 type ProductService interface {
 	GetAll(ctx context.Context, params model.ListProductsParams) ([]*model.ProductListItem, error)
 	GetByID(ctx context.Context, id int64) (*ProductWithVariants, error)
+	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
 }
 
 type productService struct {
@@ -64,6 +66,10 @@ func (s *productService) GetByID(ctx context.Context, id int64) (*ProductWithVar
 	}
 
 	return &ProductWithVariants{Product: product, Variants: variants}, nil
+}
+
+func (s *productService) GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error) {
+	return s.repo.GetAvailableFilters(ctx, categoryID)
 }
 
 func normalizeListParams(p *model.ListProductsParams) {

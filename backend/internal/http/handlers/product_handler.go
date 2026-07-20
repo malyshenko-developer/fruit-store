@@ -22,15 +22,10 @@ func NewProductHandler(service service.ProductService, logger *slog.Logger) *Pro
 }
 
 func (h *ProductHandler) List(c *gin.Context) {
-	var categoryID *int64
-
-	if categoryIDStr := c.Query("category_id"); categoryIDStr != "" {
-		parsed, err := strconv.ParseInt(categoryIDStr, 10, 64)
-		if err != nil {
-			writeBadRequest(c, "category_id must be a number")
-			return
-		}
-		categoryID = &parsed
+	categoryID, err := parseOptionalInt64Query(c, "category_id")
+	if err != nil {
+		writeBadRequest(c, "category_id must be a number")
+		return
 	}
 
 	attributes := make(map[string]string)
@@ -83,4 +78,21 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 	}
 
 	writeOK(c, dto.ProductDetailToResponse(product))
+}
+
+func (h *ProductHandler) GetFilters(c *gin.Context) {
+	categoryID, err := parseOptionalInt64Query(c, "category_id")
+	if err != nil {
+		writeBadRequest(c, "category_id must be a number")
+		return
+	}
+
+	filters, err := h.service.GetAvailableFilters(c.Request.Context(), categoryID)
+	if err != nil {
+		h.logger.Error("failed to fetch filters", "error", err, "category_id", categoryID)
+		writeInternalError(c, "failed to fetch filters")
+		return
+	}
+
+	writeOK(c, dto.ProductFiltersToResponse(filters))
 }

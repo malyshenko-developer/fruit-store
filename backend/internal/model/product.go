@@ -25,3 +25,9 @@ type ListProductsParams struct {
 	Order      string
 	Attributes map[string]string
 }
+
+type ProductFilters struct {
+	Attributes map[string][]string
+	MinPrice   float64
+	MaxPrice   float64
+}
