@@ -23,7 +23,7 @@ type ListProductsParams struct {
 	CategoryID *int64
 	SortBy     string
 	Order      string
-	Attributes map[string]string
+	Attributes map[string][]string
 }
 
 type ProductFilters struct {

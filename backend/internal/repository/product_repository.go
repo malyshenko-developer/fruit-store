@@ -5,12 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/malyshenko-developer/fruit-store/internal/apperr"
 	"github.com/malyshenko-developer/fruit-store/internal/model"
 )
+
+var safeAttributeKeyPattern = regexp.MustCompile(`^[a-z_]+$`)
 
 type ProductRepository struct {
 	pool *pgxpool.Pool
@@ -31,14 +35,18 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 		orderDirection = "DESC"
 	}
 
-	var attributesFilter interface{}
-	if len(params.Attributes) > 0 {
-		attrs, err := json.Marshal(params.Attributes)
-		if err != nil {
-			return nil, err
+	conditions := []string{"($1::bigint IS NULL OR p.category_id = $1)"}
+	args := []interface{}{params.CategoryID}
+
+	for key, values := range params.Attributes {
+		if len(values) == 0 || !safeAttributeKeyPattern.MatchString(key) {
+			continue
 		}
-		attributesFilter = attrs
+		args = append(args, values)
+		conditions = append(conditions, fmt.Sprintf("pv.attributes->>'%s' = ANY($%d)", key, len(args)))
 	}
+
+	whereClause := strings.Join(conditions, " AND ")
 
 	q := fmt.Sprintf(`
 		SELECT
@@ -52,11 +60,10 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 			pv.attributes
 		FROM product_variants pv
 		JOIN products p ON p.id = pv.product_id
-		WHERE ($1::bigint IS NULL OR p.category_id = $1)
-			AND ($2::jsonb IS NULL OR pv.attributes @> $2::jsonb)
-		ORDER BY %s %s`, orderColumn, orderDirection)
+		WHERE %s
+		ORDER BY %s %s`, whereClause, orderColumn, orderDirection)
 
-	rows, err := r.pool.Query(ctx, q, params.CategoryID, attributesFilter)
+	rows, err := r.pool.Query(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}

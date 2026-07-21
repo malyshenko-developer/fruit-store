@@ -28,10 +28,10 @@ func (h *ProductHandler) List(c *gin.Context) {
 		return
 	}
 
-	attributes := make(map[string]string)
+	attributes := make(map[string][]string)
 	for key := range service.AllowedAttributeFilters {
-		if value := c.Query(key); value != "" {
-			attributes[key] = value
+		if values := c.QueryArray(key); len(values) > 0 {
+			attributes[key] = values
 		}
 	}
 
