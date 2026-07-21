@@ -1,18 +1,18 @@
 import {notFound} from "next/navigation";
 
 import {SortSelect} from "@/features/sort-products";
-import {AttributeFilter, ColorFilter} from "@/features/filter-products";
+import {categoryFilterConfig, CategoryFilters} from "@/features/filter-products";
 
 import {getCategoryBySlug} from "@/entities/category";
 import {getProductFilters, getProducts, ProductList} from "@/entities/product";
 
 interface Props {
     params: Promise<{ slug: string }>
-    searchParams: Promise<{ sort_by?: string; order?: string; color?: string | string[]; series?: string | string[]; storage?: string | string[]; }>
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-function toArray(value?: string | string[]): string[] | undefined {
-    if (!value) return undefined;
+function toArray(value?: string | string[]): string[] {
+    if (!value) return [];
     return Array.isArray(value) ? value : [value];
 }
 
@@ -26,26 +26,26 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
         notFound()
     }
 
+    const fields = categoryFilterConfig[slug] ?? [];
+    const attributes: Record<string, string[]> = {};
+    for (const field of fields) {
+        attributes[field.paramName] = toArray(sp[field.paramName]);
+    }
+
     const [products, filters] = await Promise.all([
         getProducts({
             categoryId: category.id,
-            sortBy: sp.sort_by,
-            order: sp.order,
-            attributes: {
-                color: toArray(sp.color) ?? [],
-                series: toArray(sp.series) ?? [],
-                storage: toArray(sp.storage) ?? [],
-            },
+            sortBy: typeof sp.sort_by === "string" ? sp.sort_by : undefined,
+            order: typeof sp.order === "string" ? sp.order : undefined,
+            attributes,
         }),
-        getProductFilters(category.id)
-    ])
+        getProductFilters(category.id),
+    ]);
 
     return (
         <div className="p-8 flex gap-8">
-            <aside className="w-48 shrink-0 space-y-6">
-                <ColorFilter paramName="color" label="Color" options={filters.attributes.color ?? []} />
-                <AttributeFilter paramName="series" label="Series" options={filters.attributes.series ?? []} />
-                <AttributeFilter paramName="storage" label="Storage" options={filters.attributes.storage ?? []} />
+            <aside className="w-48 shrink-0">
+                <CategoryFilters categorySlug={slug} availableAttributes={filters.attributes} />
             </aside>
             <div className="flex-1">
                 <div className="flex items-center justify-between mb-4">

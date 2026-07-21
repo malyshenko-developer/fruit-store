@@ -1,2 +1,2 @@
-export { ColorFilter } from "./ui/ColorFilter";
-export { AttributeFilter } from "./ui/AttributeFilter";
+export { CategoryFilters } from "./ui/CategoryFilters";
+export { categoryFilterConfig } from "./model/filterConfig";
