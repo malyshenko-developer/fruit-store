@@ -4,7 +4,7 @@ import {SortSelect} from "@/features/sort-products";
 import {ColorFilter} from "@/features/filter-products";
 
 import {getCategoryBySlug} from "@/entities/category";
-import {getProducts, ProductList} from "@/entities/product";
+import {getProductFilters, getProducts, ProductList} from "@/entities/product";
 
 interface Props {
     params: Promise<{ slug: string }>
@@ -21,17 +21,20 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
         notFound()
     }
 
-    const products = await getProducts({
-        categoryId: category.id,
-        sortBy: sort_by,
-        order: order,
-        color: color,
-    })
+    const [products, filters] = await Promise.all([
+        getProducts({
+            categoryId: category.id,
+            sortBy: sort_by,
+            order: order,
+            color: color,
+        }),
+        getProductFilters(category.id)
+    ])
 
     return (
         <div className="p-8 flex gap-8">
             <aside className="w-48 shrink-0">
-                <ColorFilter />
+                <ColorFilter colors={filters.attributes.color ?? []} />
             </aside>
             <div className="flex-1">
                 <div className="flex items-center justify-between mb-4">

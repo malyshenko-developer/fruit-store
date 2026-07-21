@@ -2,9 +2,11 @@
 
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 
-const colors = ["Titanium Black", "Silver", "Black"];
+interface Props {
+    colors: string[];
+}
 
-export function ColorFilter() {
+export function ColorFilter({ colors }: Props) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -21,6 +23,10 @@ export function ColorFilter() {
         }
 
         router.push(`${pathname}?${params.toString()}`);
+    }
+
+    if (colors.length === 0) {
+        return null
     }
 
     return (

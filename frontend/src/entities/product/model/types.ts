@@ -26,3 +26,8 @@ export interface ProductDetail {
     image_url: string;
     variants: ProductVariant[];
 }
+
+export interface ProductFilters {
+    attributes: Record<string, string[]>;
+    price_range: { min: number; max: number };
+}

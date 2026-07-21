@@ -1,6 +1,6 @@
 import { apiFetch } from "@/shared/api/client";
 
-import type { ProductListItem, ProductDetail } from "../model/types";
+import type {ProductListItem, ProductDetail, ProductFilters} from "../model/types";
 
 interface GetProductsParams {
     categoryId?: number;
@@ -24,4 +24,9 @@ export async function getProducts(params: GetProductsParams = {}): Promise<Produ
 
 export async function getProductById(id: number): Promise<ProductDetail> {
     return apiFetch<ProductDetail>(`/products/${id}`);
+}
+
+export async function getProductFilters(categoryId?: number): Promise<ProductFilters> {
+    const query =  categoryId ? `?category_id=${categoryId}` : "";
+    return apiFetch<ProductFilters>(`/products/filters${query}`);
 }
