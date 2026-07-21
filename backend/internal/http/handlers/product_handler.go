@@ -40,6 +40,18 @@ func (h *ProductHandler) List(c *gin.Context) {
 		return
 	}
 
+	minScreenSize, err := parseOptionalFloat64Query(c, "min_screen_size")
+	if err != nil {
+		writeBadRequest(c, "min_screen_size must be a number")
+		return
+	}
+
+	maxScreenSize, err := parseOptionalFloat64Query(c, "max_screen_size")
+	if err != nil {
+		writeBadRequest(c, "max_screen_size must be a number")
+		return
+	}
+
 	attributes := make(map[string][]string)
 	for key := range service.AllowedAttributeFilters {
 		if values := c.QueryArray(key); len(values) > 0 {
@@ -48,12 +60,14 @@ func (h *ProductHandler) List(c *gin.Context) {
 	}
 
 	params := model.ListProductsParams{
-		CategoryID: categoryID,
-		SortBy:     c.Query("sort_by"),
-		Order:      c.Query("order"),
-		Attributes: attributes,
-		MinPrice:   minPrice,
-		MaxPrice:   maxPrice,
+		CategoryID:    categoryID,
+		SortBy:        c.Query("sort_by"),
+		Order:         c.Query("order"),
+		Attributes:    attributes,
+		MinPrice:      minPrice,
+		MaxPrice:      maxPrice,
+		MinScreenSize: minScreenSize,
+		MaxScreenSize: maxScreenSize,
 	}
 
 	products, err := h.service.GetAll(c.Request.Context(), params)

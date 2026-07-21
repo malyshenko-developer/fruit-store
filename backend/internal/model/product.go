@@ -20,12 +20,14 @@ type ProductListItem struct {
 }
 
 type ListProductsParams struct {
-	CategoryID *int64
-	SortBy     string
-	Order      string
-	Attributes map[string][]string
-	MinPrice   *float64
-	MaxPrice   *float64
+	CategoryID    *int64
+	SortBy        string
+	Order         string
+	Attributes    map[string][]string
+	MinPrice      *float64
+	MaxPrice      *float64
+	MinScreenSize *float64
+	MaxScreenSize *float64
 }
 
 type ProductFilters struct {

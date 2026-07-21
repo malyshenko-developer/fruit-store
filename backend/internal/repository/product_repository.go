@@ -44,6 +44,12 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 	args = append(args, params.MaxPrice)
 	conditions = append(conditions, fmt.Sprintf("($%d::numeric IS NULL OR pv.price <= $%d)", len(args), len(args)))
 
+	args = append(args, params.MinScreenSize)
+	conditions = append(conditions, fmt.Sprintf("($%d::numeric IS NULL OR (pv.attributes->>'screen_size')::numeric >= $%d)", len(args), len(args)))
+
+	args = append(args, params.MaxScreenSize)
+	conditions = append(conditions, fmt.Sprintf("($%d::numeric IS NULL OR (pv.attributes->>'screen_size')::numeric <= $%d)", len(args), len(args)))
+
 	for key, values := range params.Attributes {
 		if len(values) == 0 || !safeAttributeKeyPattern.MatchString(key) {
 			continue
