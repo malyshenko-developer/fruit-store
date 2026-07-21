@@ -38,6 +38,10 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
             sortBy: typeof sp.sort_by === "string" ? sp.sort_by : undefined,
             order: typeof sp.order === "string" ? sp.order : undefined,
             attributes,
+            minPrice: typeof sp.min_price === "string" ? Number(sp.min_price) : undefined,
+            maxPrice: typeof sp.max_price === "string" ? Number(sp.max_price) : undefined,
+            minScreenSize: typeof sp.min_screen_size === "string" ? Number(sp.min_screen_size) : undefined,
+            maxScreenSize: typeof sp.max_screen_size === "string" ? Number(sp.max_screen_size) : undefined,
         }),
         getProductFilters(category.id),
     ]);

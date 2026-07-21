@@ -7,6 +7,10 @@ interface GetProductsParams {
     sortBy?: string;
     order?: string;
     attributes?: Record<string, string[]>;
+    minPrice?: number;
+    maxPrice?: number;
+    minScreenSize?: number;
+    maxScreenSize?: number;
 }
 
 export async function getProducts(params: GetProductsParams = {}): Promise<ProductListItem[]> {
@@ -22,6 +26,10 @@ export async function getProducts(params: GetProductsParams = {}): Promise<Produ
             }
         }
     }
+    if (params.minPrice !== undefined) query.set("min_price", String(params.minPrice));
+    if (params.maxPrice !== undefined) query.set("max_price", String(params.maxPrice));
+    if (params.minScreenSize !== undefined) query.set("min_screen_size", String(params.minScreenSize));
+    if (params.maxScreenSize !== undefined) query.set("max_screen_size", String(params.maxScreenSize));
 
     const queryString = query.toString();
     return apiFetch<ProductListItem[]>(`/products${queryString ? `?${queryString}` : ""}`);
