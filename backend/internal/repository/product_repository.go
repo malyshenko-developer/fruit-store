@@ -38,6 +38,12 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 	conditions := []string{"($1::bigint IS NULL OR p.category_id = $1)"}
 	args := []interface{}{params.CategoryID}
 
+	args = append(args, params.MinPrice)
+	conditions = append(conditions, fmt.Sprintf("($%d::numeric IS NULL OR pv.price >= $%d)", len(args), len(args)))
+
+	args = append(args, params.MaxPrice)
+	conditions = append(conditions, fmt.Sprintf("($%d::numeric IS NULL OR pv.price <= $%d)", len(args), len(args)))
+
 	for key, values := range params.Attributes {
 		if len(values) == 0 || !safeAttributeKeyPattern.MatchString(key) {
 			continue

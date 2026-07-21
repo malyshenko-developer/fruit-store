@@ -28,6 +28,18 @@ func (h *ProductHandler) List(c *gin.Context) {
 		return
 	}
 
+	minPrice, err := parseOptionalFloat64Query(c, "min_price")
+	if err != nil {
+		writeBadRequest(c, "min_price must be a number")
+		return
+	}
+
+	maxPrice, err := parseOptionalFloat64Query(c, "max_price")
+	if err != nil {
+		writeBadRequest(c, "max_price must be a number")
+		return
+	}
+
 	attributes := make(map[string][]string)
 	for key := range service.AllowedAttributeFilters {
 		if values := c.QueryArray(key); len(values) > 0 {
@@ -40,6 +52,8 @@ func (h *ProductHandler) List(c *gin.Context) {
 		SortBy:     c.Query("sort_by"),
 		Order:      c.Query("order"),
 		Attributes: attributes,
+		MinPrice:   minPrice,
+		MaxPrice:   maxPrice,
 	}
 
 	products, err := h.service.GetAll(c.Request.Context(), params)

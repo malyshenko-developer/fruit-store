@@ -36,3 +36,17 @@ func parseOptionalInt64Query(c *gin.Context, key string) (*int64, error) {
 
 	return &parsed, nil
 }
+
+func parseOptionalFloat64Query(c *gin.Context, key string) (*float64, error) {
+	value := c.Query(key)
+	if value == "" {
+		return nil, nil
+	}
+
+	parsed, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsed, nil
+}

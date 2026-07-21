@@ -18,9 +18,14 @@ var allowedOrders = map[string]bool{
 
 var AllowedAttributeFilters = map[string]bool{
 	"color":        true,
+	"case_color":   true,
+	"band_color":   true,
 	"storage":      true,
-	"chip":         true,
 	"connectivity": true,
+	"series":       true,
+	"chip":         true,
+	"ram":          true,
+	"display_type": true,
 }
 
 type ProductWithVariants struct {

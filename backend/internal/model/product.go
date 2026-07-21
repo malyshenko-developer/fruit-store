@@ -24,6 +24,8 @@ type ListProductsParams struct {
 	SortBy     string
 	Order      string
 	Attributes map[string][]string
+	MinPrice   *float64
+	MaxPrice   *float64
 }
 
 type ProductFilters struct {
