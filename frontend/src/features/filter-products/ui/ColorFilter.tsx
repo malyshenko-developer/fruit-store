@@ -11,15 +11,18 @@ export function ColorFilter({ colors }: Props) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const currentColor = searchParams.get("color") ?? "";
+    const selectedColors = searchParams.getAll("color");
 
     function handleChange(color: string) {
         const params = new URLSearchParams(searchParams.toString());
+        params.delete("color")
 
-        if (currentColor === color) {
-            params.delete("color");
-        } else {
-            params.set("color", color);
+        const next = selectedColors.includes(color)
+            ? selectedColors.filter((c) => c !== color)
+            : [...selectedColors, color];
+
+        for (const c of next) {
+            params.append("color", c);
         }
 
         router.push(`${pathname}?${params.toString()}`);
@@ -36,7 +39,7 @@ export function ColorFilter({ colors }: Props) {
                 <label key={color} className="flex items-center gap-2 text-sm">
                     <input
                         type="checkbox"
-                        checked={currentColor === color}
+                        checked={selectedColors.includes(color)}
                         onChange={() => handleChange(color)}
                     />
                     {color}

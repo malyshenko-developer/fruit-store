@@ -8,7 +8,7 @@ import {getProductFilters, getProducts, ProductList} from "@/entities/product";
 
 interface Props {
     params: Promise<{ slug: string }>
-    searchParams: Promise<{ sort_by?: string; order?: string; color?: string }>
+    searchParams: Promise<{ sort_by?: string; order?: string; color?: string | string[] }>
 }
 
 export default async function CategoryPage ({ params, searchParams }: Props) {
@@ -21,12 +21,14 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
         notFound()
     }
 
+    const colors = color ? (Array.isArray(color) ? color : [color]) : undefined
+
     const [products, filters] = await Promise.all([
         getProducts({
             categoryId: category.id,
             sortBy: sort_by,
             order: order,
-            color: color,
+            colors: colors,
         }),
         getProductFilters(category.id)
     ])
