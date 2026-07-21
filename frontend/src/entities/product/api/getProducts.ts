@@ -6,7 +6,7 @@ interface GetProductsParams {
     categoryId?: number;
     sortBy?: string;
     order?: string;
-    colors?: string[];
+    attributes?: Record<string, string[]>;
 }
 
 export async function getProducts(params: GetProductsParams = {}): Promise<ProductListItem[]> {
@@ -15,9 +15,11 @@ export async function getProducts(params: GetProductsParams = {}): Promise<Produ
     if (params.categoryId) query.set("category_id", String(params.categoryId));
     if (params.sortBy) query.set("sort_by", params.sortBy);
     if (params.order) query.set("order", params.order);
-    if (params.colors) {
-        for (const color of params.colors) {
-            query.append("color", color);
+    if (params.attributes) {
+        for (const [key, values] of Object.entries(params.attributes)) {
+            for (const value of values) {
+                query.append(key, value);
+            }
         }
     }
 

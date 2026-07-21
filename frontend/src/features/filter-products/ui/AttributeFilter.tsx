@@ -8,7 +8,7 @@ interface Props {
     options: string[];
 }
 
-export function ColorFilter({ paramName, label, options }: Props) {
+export function AttributeFilter({ paramName, label, options }: Props) {
     const { selected, toggle } = useAttributeFilter(paramName);
 
     if (options.length === 0) {
@@ -21,11 +21,6 @@ export function ColorFilter({ paramName, label, options }: Props) {
             {options.map((option) => (
                 <label key={option} className="flex items-center gap-2 text-sm">
                     <input type="checkbox" checked={selected.includes(option)} onChange={() => toggle(option)} />
-                    <span
-                        className="w-4 h-4 rounded-full border inline-block"
-                        style={{ backgroundColor: "#ccc" }}
-                        // TODO: заменить на реальный hex с бэка, когда будет добавлен colorHex в атрибуты
-                    />
                     {option}
                 </label>
             ))}
