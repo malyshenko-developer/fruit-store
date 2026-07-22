@@ -24,7 +24,7 @@ func NewProductRepository(pool *pgxpool.Pool) *ProductRepository {
 	return &ProductRepository{pool: pool}
 }
 
-func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProductsParams) ([]*model.ProductListItem, error) {
+func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error) {
 	orderColumn := "pv.price"
 	if params.SortBy == "created_at" {
 		orderColumn = "p.created_at"
@@ -60,6 +60,22 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 
 	whereClause := strings.Join(conditions, " AND ")
 
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM product_variants pv
+		JOIN products p ON p.id = pv.product_id
+		WHERE %s`, whereClause)
+
+	var total int
+	if err := r.pool.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
+		return nil, err
+	}
+
+	offset := (params.Page - 1) * params.Limit
+	args = append(args, params.Limit, offset)
+	limitPlaceholder := len(args) - 1
+	offsetPlaceholder := len(args)
+
 	q := fmt.Sprintf(`
 		SELECT
 			pv.id,
@@ -73,7 +89,8 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 		FROM product_variants pv
 		JOIN products p ON p.id = pv.product_id
 		WHERE %s
-		ORDER BY %s %s`, whereClause, orderColumn, orderDirection)
+		ORDER BY %s %s
+		LIMIT $%d OFFSET $%d`, whereClause, orderColumn, orderDirection, limitPlaceholder, offsetPlaceholder)
 
 	rows, err := r.pool.Query(ctx, q, args...)
 	if err != nil {
@@ -96,8 +113,16 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 
 		items = append(items, &item)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
-	return items, rows.Err()
+	return &model.PaginatedProducts{
+		Items: items,
+		Total: total,
+		Page:  params.Page,
+		Limit: params.Limit,
+	}, nil
 }
 
 func (r *ProductRepository) GetByID(ctx context.Context, id int64) (*model.Product, error) {

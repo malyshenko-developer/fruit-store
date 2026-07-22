@@ -52,6 +52,26 @@ func (h *ProductHandler) List(c *gin.Context) {
 		return
 	}
 
+	page := 1
+	if pageStr := c.Query("page"); pageStr != "" {
+		parsed, err := strconv.Atoi(pageStr)
+		if err != nil {
+			writeBadRequest(c, "page must be a number")
+			return
+		}
+		page = parsed
+	}
+
+	limit := 0
+	if limitStr := c.Query("limit"); limitStr != "" {
+		parsed, err := strconv.Atoi(limitStr)
+		if err != nil {
+			writeBadRequest(c, "limit must be a number")
+			return
+		}
+		limit = parsed
+	}
+
 	attributes := make(map[string][]string)
 	for key := range service.AllowedAttributeFilters {
 		if values := c.QueryArray(key); len(values) > 0 {
@@ -68,6 +88,8 @@ func (h *ProductHandler) List(c *gin.Context) {
 		MaxPrice:      maxPrice,
 		MinScreenSize: minScreenSize,
 		MaxScreenSize: maxScreenSize,
+		Page:          page,
+		Limit:         limit,
 	}
 
 	products, err := h.service.GetAll(c.Request.Context(), params)
@@ -77,12 +99,7 @@ func (h *ProductHandler) List(c *gin.Context) {
 		return
 	}
 
-	response := make([]*dto.ProductListItemResponse, 0, len(products))
-	for _, p := range products {
-		response = append(response, dto.ProductListItemToResponse(p))
-	}
-
-	writeOK(c, response)
+	writeOK(c, dto.PaginatedProductsToResponse(products))
 }
 
 func (h *ProductHandler) GetByID(c *gin.Context) {

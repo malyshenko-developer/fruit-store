@@ -28,10 +28,19 @@ type ListProductsParams struct {
 	MaxPrice      *float64
 	MinScreenSize *float64
 	MaxScreenSize *float64
+	Page          int
+	Limit         int
 }
 
 type ProductFilters struct {
 	Attributes map[string][]string
 	MinPrice   float64
 	MaxPrice   float64
+}
+
+type PaginatedProducts struct {
+	Items []*ProductListItem
+	Total int
+	Page  int
+	Limit int
 }

@@ -89,3 +89,31 @@ func ProductFiltersToResponse(f *model.ProductFilters) *ProductFiltersResponse {
 		},
 	}
 }
+
+type PaginatedProductsResponse struct {
+	Items      []*ProductListItemResponse `json:"items"`
+	Total      int                        `json:"total"`
+	Page       int                        `json:"page"`
+	Limit      int                        `json:"limit"`
+	TotalPages int                        `json:"total_pages"`
+}
+
+func PaginatedProductsToResponse(p *model.PaginatedProducts) *PaginatedProductsResponse {
+	items := make([]*ProductListItemResponse, 0, len(p.Items))
+	for _, item := range p.Items {
+		items = append(items, ProductListItemToResponse(item))
+	}
+
+	totalPages := 0
+	if p.Limit > 0 {
+		totalPages = (p.Total + p.Limit - 1) / p.Limit
+	}
+
+	return &PaginatedProductsResponse{
+		Items:      items,
+		Total:      p.Total,
+		Page:       p.Page,
+		Limit:      p.Limit,
+		TotalPages: totalPages,
+	}
+}

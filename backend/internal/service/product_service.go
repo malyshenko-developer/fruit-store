@@ -6,6 +6,11 @@ import (
 	"github.com/malyshenko-developer/fruit-store/internal/model"
 )
 
+const (
+	defaultLimit = 12
+	maxLimit     = 100
+)
+
 var allowedSortFields = map[string]bool{
 	"price":      true,
 	"created_at": true,
@@ -34,14 +39,14 @@ type ProductWithVariants struct {
 }
 
 type ProductRepository interface {
-	GetAll(ctx context.Context, params model.ListProductsParams) ([]*model.ProductListItem, error)
+	GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error)
 	GetByID(ctx context.Context, id int64) (*model.Product, error)
 	GetVariantsByProductID(ctx context.Context, productID int64) ([]*model.ProductVariant, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
 }
 
 type ProductService interface {
-	GetAll(ctx context.Context, params model.ListProductsParams) ([]*model.ProductListItem, error)
+	GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error)
 	GetByID(ctx context.Context, id int64) (*ProductWithVariants, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
 }
@@ -54,7 +59,7 @@ func NewProductService(repo ProductRepository) ProductService {
 	return &productService{repo: repo}
 }
 
-func (s *productService) GetAll(ctx context.Context, params model.ListProductsParams) ([]*model.ProductListItem, error) {
+func (s *productService) GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error) {
 	normalizeListParams(&params)
 	return s.repo.GetAll(ctx, params)
 }
@@ -83,5 +88,14 @@ func normalizeListParams(p *model.ListProductsParams) {
 	}
 	if !allowedOrders[p.Order] {
 		p.Order = "desc"
+	}
+	if p.Page < 1 {
+		p.Page = 1
+	}
+	if p.Limit < 1 {
+		p.Limit = defaultLimit
+	}
+	if p.Limit > maxLimit {
+		p.Limit = maxLimit
 	}
 }
