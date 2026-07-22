@@ -31,3 +31,11 @@ export interface ProductFilters {
     attributes: Record<string, string[]>;
     price_range: { min: number; max: number };
 }
+
+export interface PaginatedProducts {
+    items: ProductListItem[];
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
+}

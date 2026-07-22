@@ -2,6 +2,7 @@ import {notFound} from "next/navigation";
 
 import {SortSelect} from "@/features/sort-products";
 import {categoryFilterConfig, CategoryFilters} from "@/features/filter-products";
+import {Pagination} from "@/features/paginate-products";
 
 import {getCategoryBySlug} from "@/entities/category";
 import {getProductFilters, getProducts, ProductList} from "@/entities/product";
@@ -32,7 +33,7 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
         attributes[field.paramName] = toArray(sp[field.paramName]);
     }
 
-    const [products, filters] = await Promise.all([
+    const [paginatedProducts, filters] = await Promise.all([
         getProducts({
             categoryId: category.id,
             sortBy: typeof sp.sort_by === "string" ? sp.sort_by : undefined,
@@ -42,10 +43,11 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
             maxPrice: typeof sp.max_price === "string" ? Number(sp.max_price) : undefined,
             minScreenSize: typeof sp.min_screen_size === "string" ? Number(sp.min_screen_size) : undefined,
             maxScreenSize: typeof sp.max_screen_size === "string" ? Number(sp.max_screen_size) : undefined,
+            page: typeof sp.page === "string" ? Number(sp.page) : undefined,
+            limit: typeof sp.limit === "string" ? Number(sp.limit) : undefined,
         }),
         getProductFilters(category.id),
     ]);
-
     return (
         <div className="p-8 flex gap-8">
             <aside className="w-48 shrink-0">
@@ -56,7 +58,12 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
                     <h1 className="text-2xl font-bold">{category.name}</h1>
                     <SortSelect />
                 </div>
-                <ProductList products={products} />
+                <ProductList products={paginatedProducts.items} />
+                <Pagination
+                    currentPage={paginatedProducts.page}
+                    totalPages={paginatedProducts.total_pages}
+                    searchParams={sp}
+                />
             </div>
         </div>
     )

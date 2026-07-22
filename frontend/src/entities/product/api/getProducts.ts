@@ -1,6 +1,6 @@
 import { apiFetch } from "@/shared/api/client";
 
-import type {ProductListItem, ProductDetail, ProductFilters} from "../model/types";
+import type {ProductListItem, ProductDetail, ProductFilters, PaginatedProducts} from "../model/types";
 
 interface GetProductsParams {
     categoryId?: number;
@@ -11,9 +11,11 @@ interface GetProductsParams {
     maxPrice?: number;
     minScreenSize?: number;
     maxScreenSize?: number;
+    page?: number;
+    limit?: number;
 }
 
-export async function getProducts(params: GetProductsParams = {}): Promise<ProductListItem[]> {
+export async function getProducts(params: GetProductsParams = {}): Promise<PaginatedProducts> {
     const query = new URLSearchParams();
 
     if (params.categoryId) query.set("category_id", String(params.categoryId));
@@ -30,9 +32,11 @@ export async function getProducts(params: GetProductsParams = {}): Promise<Produ
     if (params.maxPrice !== undefined) query.set("max_price", String(params.maxPrice));
     if (params.minScreenSize !== undefined) query.set("min_screen_size", String(params.minScreenSize));
     if (params.maxScreenSize !== undefined) query.set("max_screen_size", String(params.maxScreenSize));
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.limit !== undefined) query.set("limit", String(params.limit));
 
     const queryString = query.toString();
-    return apiFetch<ProductListItem[]>(`/products${queryString ? `?${queryString}` : ""}`);
+    return apiFetch<PaginatedProducts>(`/products${queryString ? `?${queryString}` : ""}`);
 }
 
 export async function getProductById(id: number): Promise<ProductDetail> {
