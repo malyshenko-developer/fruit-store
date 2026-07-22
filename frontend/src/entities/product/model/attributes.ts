@@ -36,3 +36,44 @@ export function getMacAttributes(variant: HasAttributes): MacAttributes {
         storage: getString(variant.attributes, "storage"),
     }
 }
+
+export interface WatchAttributes {
+    seriesName: string | null;
+    caseColor: string | null;
+    bandColor: string | null;
+}
+
+export function getWatchAttributes(variant: HasAttributes): WatchAttributes {
+    return {
+        seriesName: getString(variant.attributes, "series"),
+        caseColor: getString(variant.attributes, "case_color"),
+        bandColor: getString(variant.attributes, "band_color"),
+    };
+}
+
+export function getDisplayAttributes(categorySlug: string, variant: HasAttributes): Record<string, string> {
+    let attrs: Record<string, string | null>;
+
+    switch (categorySlug) {
+        case "iphone":
+            attrs = getIphoneAttributes(variant) as unknown as Record<string, string | null>;
+            break;
+        case "mac":
+            attrs = getMacAttributes(variant) as unknown as Record<string, string | null>;
+            break;
+        case "watch":
+            attrs = getWatchAttributes(variant) as unknown as Record<string, string | null>;
+            break;
+        default:
+            attrs = {};
+    }
+
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(attrs)) {
+        if (value !== null) {
+            result[key] = value;
+        }
+    }
+
+    return result;
+}

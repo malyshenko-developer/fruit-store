@@ -58,7 +58,7 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
                     <h1 className="text-2xl font-bold">{category.name}</h1>
                     <SortSelect />
                 </div>
-                <ProductList products={paginatedProducts.items} />
+                <ProductList products={paginatedProducts.items} categorySlug={slug} />
                 <Pagination
                     currentPage={paginatedProducts.page}
                     totalPages={paginatedProducts.total_pages}

@@ -1,6 +1,6 @@
 import { apiFetch } from "@/shared/api/client";
 
-import type {ProductListItem, ProductDetail, ProductFilters, PaginatedProducts} from "../model/types";
+import type {ProductDetail, ProductFilters, PaginatedProducts} from "../model/types";
 
 interface GetProductsParams {
     categoryId?: number;
