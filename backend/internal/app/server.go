@@ -36,6 +36,7 @@ func (s *Server) Router() *gin.Engine {
 func (s *Server) setupRouter() {
 	r := gin.New()
 	r.Use(middleware.RequestLogger(s.logger))
+	r.Use(middleware.Session())
 	r.Use(gin.Recovery())
 	r.Use(withTimeout(30 * time.Second))
 
