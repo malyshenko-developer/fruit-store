@@ -37,11 +37,13 @@ func main() {
 
 	categoryRepo := repository.NewCategoryRepository(pool)
 	productRepo := repository.NewProductRepository(pool)
+	cartRepo := repository.NewCartRepository(pool)
 
 	categoryService := service.NewCategoryService(categoryRepo)
 	productService := service.NewProductService(productRepo)
+	cartService := service.NewCartService(cartRepo, productRepo)
 
-	server := app.NewServer(categoryService, productService, appLogger)
+	server := app.NewServer(categoryService, productService, cartService, appLogger)
 
 	appLogger.Info("starting server", "port", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {

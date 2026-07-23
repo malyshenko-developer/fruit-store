@@ -16,13 +16,15 @@ type Server struct {
 	router          *gin.Engine
 	categoryService service.CategoryService
 	productService  service.ProductService
+	cartService     service.CartService
 	logger          *slog.Logger
 }
 
-func NewServer(categoryService service.CategoryService, productService service.ProductService, logger *slog.Logger) *Server {
+func NewServer(categoryService service.CategoryService, productService service.ProductService, cartService service.CartService, logger *slog.Logger) *Server {
 	s := &Server{
 		categoryService: categoryService,
 		productService:  productService,
+		cartService:     cartService,
 		logger:          logger,
 	}
 	s.setupRouter()
@@ -46,6 +48,7 @@ func (s *Server) setupRouter() {
 
 	categoryHandlers := handlers.NewCategoryHandler(s.categoryService, s.logger)
 	productHandlers := handlers.NewProductHandler(s.productService, s.logger)
+	cartHandlers := handlers.NewCartHandler(s.cartService, s.logger)
 
 	v1 := r.Group("/v1")
 	{
@@ -56,6 +59,12 @@ func (s *Server) setupRouter() {
 		products.GET("", productHandlers.List)
 		products.GET("/filters", productHandlers.GetFilters)
 		products.GET("/:id", productHandlers.GetByID)
+
+		cart := v1.Group("/cart")
+		cart.GET("", cartHandlers.GetCart)
+		cart.POST("/items", cartHandlers.AddItem)
+		cart.PATCH("/items/:variantId", cartHandlers.UpdateQuantity)
+		cart.DELETE("/items/:variantId", cartHandlers.RemoveItem)
 	}
 
 	s.router = r

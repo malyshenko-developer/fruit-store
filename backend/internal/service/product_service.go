@@ -42,6 +42,7 @@ type ProductRepository interface {
 	GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error)
 	GetByID(ctx context.Context, id int64) (*model.Product, error)
 	GetVariantsByProductID(ctx context.Context, productID int64) ([]*model.ProductVariant, error)
+	GetVariantByID(ctx context.Context, id int64) (*model.ProductVariant, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
 }
 

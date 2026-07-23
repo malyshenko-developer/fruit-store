@@ -220,3 +220,27 @@ func (r *ProductRepository) GetAvailableFilters(ctx context.Context, categoryID 
 		MaxPrice:   maxPrice,
 	}, nil
 }
+
+func (r *ProductRepository) GetVariantByID(ctx context.Context, id int64) (*model.ProductVariant, error) {
+	const q = `
+		SELECT id, product_id, sku, price, stock, attributes, image_url
+		FROM product_variants
+		WHERE id = $1`
+
+	var v model.ProductVariant
+	var rawAttributes []byte
+
+	err := r.pool.QueryRow(ctx, q, id).Scan(&v.ID, &v.ProductID, &v.SKU, &v.Price, &v.Stock, &rawAttributes, &v.ImageURL)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperr.ErrNotFound
+		}
+		return nil, err
+	}
+
+	if err := json.Unmarshal(rawAttributes, &v.Attributes); err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
