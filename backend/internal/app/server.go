@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/malyshenko-developer/fruit-store/internal/http/handlers"
 	"github.com/malyshenko-developer/fruit-store/internal/http/middleware"
@@ -38,6 +39,14 @@ func (s *Server) Router() *gin.Engine {
 func (s *Server) setupRouter() {
 	r := gin.New()
 	r.Use(middleware.RequestLogger(s.logger))
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
+	}))
+
 	r.Use(middleware.Session())
 	r.Use(gin.Recovery())
 	r.Use(withTimeout(30 * time.Second))
