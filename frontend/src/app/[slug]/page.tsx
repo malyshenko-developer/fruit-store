@@ -3,6 +3,7 @@ import {notFound} from "next/navigation";
 import {SortSelect} from "@/features/sort-products";
 import {categoryFilterConfig, CategoryFilters} from "@/features/filter-products";
 import {Pagination} from "@/features/paginate-products";
+import { AddToCartButton } from "@/features/add-to-cart";
 
 import {getCategoryBySlug} from "@/entities/category";
 import {getProductFilters, getProducts, ProductList} from "@/entities/product";
@@ -58,7 +59,7 @@ export default async function CategoryPage ({ params, searchParams }: Props) {
                     <h1 className="text-2xl font-bold">{category.name}</h1>
                     <SortSelect />
                 </div>
-                <ProductList products={paginatedProducts.items} categorySlug={slug} />
+                <ProductList products={paginatedProducts.items} categorySlug={slug} renderActions={(product) => <AddToCartButton variantId={product.variant_id} />} />
                 <Pagination
                     currentPage={paginatedProducts.page}
                     totalPages={paginatedProducts.total_pages}

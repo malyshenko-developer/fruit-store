@@ -1,3 +1,5 @@
+import {AddToCartButton} from "@/features/add-to-cart";
+
 import { getProductById, getDisplayAttributes } from "@/entities/product";
 import { getCategories } from "@/entities/category";
 
@@ -35,6 +37,9 @@ export default async function ProductPage({ params }: Props) {
                                     {key}: {value}
                                 </p>
                             ))}
+                            <div className="mt-2">
+                                <AddToCartButton variantId={variant.id} />
+                            </div>
                         </div>
                     );
                 })}
