@@ -14,7 +14,7 @@ export async function addToCart(variantId: number, quantity: number): Promise<vo
 }
 
 export async function updateCartItemQuantity(variantId: number, quantity: number): Promise<void> {
-    await apiFetch<void>("/cart/items", {
+    await apiFetch<void>(`/cart/items/${variantId}`, {
         method: "PATCH",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({quantity}),
