@@ -6,10 +6,11 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string
-	RedisURL    string
-	Port        string
-	LogLevel    string
+	DatabaseURL  string
+	RedisURL     string
+	Port         string
+	LogLevel     string
+	ResendAPIKey string
 }
 
 func Load() (*Config, error) {
@@ -33,10 +34,16 @@ func Load() (*Config, error) {
 		logLevel = "info"
 	}
 
+	resendAPIKey := os.Getenv("RESEND_API_KEY")
+	if resendAPIKey == "" {
+		return nil, fmt.Errorf("RESEND_API_KEY is required")
+	}
+
 	return &Config{
-		DatabaseURL: dbURL,
-		RedisURL:    redisURL,
-		Port:        port,
-		LogLevel:    logLevel,
+		DatabaseURL:  dbURL,
+		RedisURL:     redisURL,
+		Port:         port,
+		LogLevel:     logLevel,
+		ResendAPIKey: resendAPIKey,
 	}, nil
 }
