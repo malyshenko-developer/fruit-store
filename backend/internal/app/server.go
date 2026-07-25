@@ -19,15 +19,17 @@ type Server struct {
 	productService  service.ProductService
 	cartService     service.CartService
 	authService     service.AuthService
+	jwtSecret       string
 	logger          *slog.Logger
 }
 
-func NewServer(categoryService service.CategoryService, productService service.ProductService, cartService service.CartService, authService service.AuthService, logger *slog.Logger) *Server {
+func NewServer(categoryService service.CategoryService, productService service.ProductService, cartService service.CartService, authService service.AuthService, jwtSecret string, logger *slog.Logger) *Server {
 	s := &Server{
 		categoryService: categoryService,
 		productService:  productService,
 		cartService:     cartService,
 		authService:     authService,
+		jwtSecret:       jwtSecret,
 		logger:          logger,
 	}
 	s.setupRouter()
@@ -50,6 +52,7 @@ func (s *Server) setupRouter() {
 	}))
 
 	r.Use(middleware.Session())
+	r.Use(middleware.OptionalAuth(s.jwtSecret))
 	r.Use(gin.Recovery())
 	r.Use(withTimeout(30 * time.Second))
 

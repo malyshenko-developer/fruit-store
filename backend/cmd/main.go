@@ -58,7 +58,7 @@ func main() {
 	emailService := service.NewEmailService(cfg.ResendAPIKey)
 	authService := service.NewAuthService(userRepo, otpService, emailService, cfg.JWTSecret)
 
-	server := app.NewServer(categoryService, productService, cartService, authService, appLogger)
+	server := app.NewServer(categoryService, productService, cartService, authService, cfg.JWTSecret, appLogger)
 
 	appLogger.Info("starting server", "port", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {
