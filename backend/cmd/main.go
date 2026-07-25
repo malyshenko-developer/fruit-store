@@ -8,6 +8,7 @@ import (
 	"github.com/malyshenko-developer/fruit-store/internal/app"
 	"github.com/malyshenko-developer/fruit-store/internal/config"
 	"github.com/malyshenko-developer/fruit-store/internal/infra/db/postgres"
+	"github.com/malyshenko-developer/fruit-store/internal/infra/db/redis"
 	"github.com/malyshenko-developer/fruit-store/internal/logger"
 	"github.com/malyshenko-developer/fruit-store/internal/repository"
 	"github.com/malyshenko-developer/fruit-store/internal/service"
@@ -34,6 +35,14 @@ func main() {
 	defer pool.Close()
 
 	appLogger.Info("successfully connected to database")
+
+	redisClient, err := redis.NewClient(ctx, cfg.RedisURL)
+	if err != nil {
+		log.Fatalf("failed to connect to redis: %v", err)
+	}
+	defer redisClient.Close()
+
+	appLogger.Info("successfully connected to redis")
 
 	categoryRepo := repository.NewCategoryRepository(pool)
 	productRepo := repository.NewProductRepository(pool)

@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	DatabaseURL string
+	RedisURL    string
 	Port        string
 	LogLevel    string
 }
@@ -15,6 +16,11 @@ func Load() (*Config, error) {
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
 		return nil, fmt.Errorf("DATABASE_URL is required")
+	}
+
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379"
 	}
 
 	port := os.Getenv("PORT")
@@ -29,6 +35,7 @@ func Load() (*Config, error) {
 
 	return &Config{
 		DatabaseURL: dbURL,
+		RedisURL:    redisURL,
 		Port:        port,
 		LogLevel:    logLevel,
 	}, nil
