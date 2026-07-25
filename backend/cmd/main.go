@@ -52,7 +52,13 @@ func main() {
 	productService := service.NewProductService(productRepo)
 	cartService := service.NewCartService(cartRepo, productRepo)
 
-	server := app.NewServer(categoryService, productService, cartService, appLogger)
+	userRepo := repository.NewUserRepository(pool)
+
+	otpService := service.NewOTPService(redisClient)
+	emailService := service.NewEmailService(cfg.ResendAPIKey)
+	authService := service.NewAuthService(userRepo, otpService, emailService, cfg.JWTSecret)
+
+	server := app.NewServer(categoryService, productService, cartService, authService, appLogger)
 
 	appLogger.Info("starting server", "port", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {
