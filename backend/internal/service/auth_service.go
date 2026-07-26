@@ -19,19 +19,21 @@ type UserRepository interface {
 
 type AuthService interface {
 	RequestCode(ctx context.Context, email string) error
-	VerifyCode(ctx context.Context, email, code string) (string, error)
+	VerifyCode(ctx context.Context, email, code, sessionID string) (string, error)
 }
 
 type authService struct {
 	userRepo     UserRepository
+	cartRepo     CartRepository
 	otpService   OTPService
 	emailService EmailService
 	jwtSecret    string
 }
 
-func NewAuthService(userRepo UserRepository, otpService OTPService, emailService EmailService, jwtSecret string) AuthService {
+func NewAuthService(userRepo UserRepository, cartRepo CartRepository, otpService OTPService, emailService EmailService, jwtSecret string) AuthService {
 	return &authService{
 		userRepo:     userRepo,
+		cartRepo:     cartRepo,
 		otpService:   otpService,
 		emailService: emailService,
 		jwtSecret:    jwtSecret,
@@ -47,7 +49,7 @@ func (s *authService) RequestCode(ctx context.Context, email string) error {
 	return s.emailService.SendOTPCode(email, code)
 }
 
-func (s *authService) VerifyCode(ctx context.Context, email, code string) (string, error) {
+func (s *authService) VerifyCode(ctx context.Context, email, code, sessionID string) (string, error) {
 	if err := s.otpService.Verify(ctx, email, code); err != nil {
 		return "", err
 	}
@@ -62,6 +64,10 @@ func (s *authService) VerifyCode(ctx context.Context, email, code string) (strin
 		if err != nil {
 			return "", err
 		}
+	}
+
+	if err := s.cartRepo.AttachToUser(ctx, sessionID, user.ID); err != nil {
+		return "", err
 	}
 
 	return s.generateJWT(user.ID)

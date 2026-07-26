@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/malyshenko-developer/fruit-store/internal/http/dto"
+	"github.com/malyshenko-developer/fruit-store/internal/http/middleware"
 	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
 
@@ -46,7 +47,9 @@ func (h *AuthHandler) VerifyCode(c *gin.Context) {
 		return
 	}
 
-	token, err := h.service.VerifyCode(c.Request.Context(), req.Email, req.Code)
+	sessionID := middleware.GetSessionID(c)
+
+	token, err := h.service.VerifyCode(c.Request.Context(), req.Email, req.Code, sessionID)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidCode) {
 			writeBadRequest(c, "invalid or expired code")

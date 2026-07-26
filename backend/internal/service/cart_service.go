@@ -15,6 +15,7 @@ type CartRepository interface {
 	AddItem(ctx context.Context, cartID, variantID int64, quantity int) error
 	UpdateQuantity(ctx context.Context, cartID, variantID int64, quantity int) error
 	RemoveItem(ctx context.Context, cartID, variantID int64) error
+	AttachToUser(ctx context.Context, sessionID string, userID int64) error
 }
 
 type CartService interface {

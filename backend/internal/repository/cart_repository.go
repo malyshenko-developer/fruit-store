@@ -112,3 +112,13 @@ func (r *CartRepository) RemoveItem(ctx context.Context, cartID, variantID int64
 	_, err := r.pool.Exec(ctx, q, cartID, variantID)
 	return err
 }
+
+func (r *CartRepository) AttachToUser(ctx context.Context, sessionID string, userID int64) error {
+	const q = `
+		UPDATE carts
+		SET user_id = $2
+		WHERE session_id = $1 AND user_id IS NULL`
+
+	_, err := r.pool.Exec(ctx, q, sessionID, userID)
+	return err
+}
