@@ -1,0 +1,1 @@
+ALTER TABLE carts DROP CONSTRAINT fk_carts_user;
