@@ -3,14 +3,14 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/malyshenko-developer/fruit-store/internal/config"
 )
 
-const authCookieName = "auth_token"
 const userIDContextKey = "user_id"
 
 func OptionalAuth(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString, err := c.Cookie(authCookieName)
+		tokenString, err := c.Cookie(config.AuthCookieName)
 		if err != nil || tokenString == "" {
 			c.Next()
 			return

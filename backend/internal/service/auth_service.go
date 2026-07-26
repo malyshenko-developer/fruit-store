@@ -7,19 +7,20 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/malyshenko-developer/fruit-store/internal/apperr"
+	"github.com/malyshenko-developer/fruit-store/internal/config"
 	"github.com/malyshenko-developer/fruit-store/internal/model"
 )
-
-const jwtTTL = 30 * 24 * time.Hour
 
 type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*model.User, error)
 	Create(ctx context.Context, email string) (*model.User, error)
+	GetByID(ctx context.Context, id int64) (*model.User, error)
 }
 
 type AuthService interface {
 	RequestCode(ctx context.Context, email string) error
 	VerifyCode(ctx context.Context, email, code, sessionID string) (string, error)
+	GetUserByID(ctx context.Context, userID int64) (*model.User, error)
 }
 
 type authService struct {
@@ -76,9 +77,13 @@ func (s *authService) VerifyCode(ctx context.Context, email, code, sessionID str
 func (s *authService) generateJWT(userID int64) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"exp":     time.Now().Add(jwtTTL).Unix(),
+		"exp":     time.Now().Add(config.AuthTokenTTL).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(s.jwtSecret))
+}
+
+func (s *authService) GetUserByID(ctx context.Context, userID int64) (*model.User, error) {
+	return s.userRepo.GetByID(ctx, userID)
 }

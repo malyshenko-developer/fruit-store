@@ -23,6 +23,10 @@ func writeBadRequest(c *gin.Context, msg string) {
 	c.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"code": "bad_request", "message": msg}})
 }
 
+func writeUnauthorized(c *gin.Context, msg string) {
+	c.JSON(http.StatusUnauthorized, gin.H{"error": gin.H{"code": "unauthorized", "message": msg}})
+}
+
 func parseOptionalInt64Query(c *gin.Context, key string) (*int64, error) {
 	value := c.Query(key)
 	if value == "" {

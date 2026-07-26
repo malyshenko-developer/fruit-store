@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -13,6 +14,11 @@ type Config struct {
 	ResendAPIKey string
 	JWTSecret    string
 }
+
+const (
+	AuthCookieName = "auth_token"
+	AuthTokenTTL   = 30 * 24 * time.Hour
+)
 
 func Load() (*Config, error) {
 	dbURL := os.Getenv("DATABASE_URL")

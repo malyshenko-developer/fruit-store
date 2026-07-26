@@ -84,6 +84,7 @@ func (s *Server) setupRouter() {
 		auth := v1.Group("/auth")
 		auth.POST("/email/request-code", authHandlers.RequestCode)
 		auth.POST("/email/verify", authHandlers.VerifyCode)
+		auth.GET("/me", authHandlers.Me)
 	}
 
 	s.router = r

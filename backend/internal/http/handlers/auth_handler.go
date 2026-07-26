@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
+	"github.com/malyshenko-developer/fruit-store/internal/config"
 	"github.com/malyshenko-developer/fruit-store/internal/http/dto"
 	"github.com/malyshenko-developer/fruit-store/internal/http/middleware"
 	"github.com/malyshenko-developer/fruit-store/internal/service"
@@ -60,5 +61,24 @@ func (h *AuthHandler) VerifyCode(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, dto.VerifyCodeResponse{Token: token})
+	c.SetCookie(config.AuthCookieName, token, int(config.AuthTokenTTL.Seconds()), "/", "", false, true)
+
+	c.JSON(200, dto.TokenToResponse(token))
+}
+
+func (h *AuthHandler) Me(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		writeUnauthorized(c, "not authenticated")
+		return
+	}
+
+	user, err := h.service.GetUserByID(c.Request.Context(), userID)
+	if err != nil {
+		h.logger.Error("failed to fetch user", "error", err, "user_id", userID)
+		writeInternalError(c, "failed to fetch user")
+		return
+	}
+
+	c.JSON(200, dto.UserToMeResponse(user))
 }
