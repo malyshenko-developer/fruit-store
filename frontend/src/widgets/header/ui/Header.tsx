@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import {AuthStatus} from "@/features/auth-modal";
+
 import {CartCounter} from "@/entities/cart";
 
 export function Header() {
@@ -8,10 +10,13 @@ export function Header() {
             <Link href="/" className="font-bold text-xl">
                 Fruit Store
             </Link>
-            <Link href="/cart" className="text-sm">
-                Cart
-                <CartCounter />
-            </Link>
+            <div className="flex items-center gap-4">
+                <AuthStatus />
+                <Link href="/cart" className="text-sm flex items-center">
+                    Cart
+                    <CartCounter />
+                </Link>
+            </div>
         </header>
     );
 }

@@ -1,0 +1,33 @@
+"use client";
+
+import { useState } from "react";
+
+import { useMe } from "@/entities/auth";
+
+import { AuthModal } from "./AuthModal";
+
+export function AuthStatus() {
+    const [isModalOpen, setModalOpen] = useState(false);
+    const { data: me, isLoading } = useMe();
+
+    if (isLoading) {
+        return null;
+    }
+
+    if (me) {
+        return (
+            <a href="/profile" className="text-sm">
+                {me.email}
+            </a>
+        );
+    }
+
+    return (
+        <>
+            <button onClick={() => setModalOpen(true)} className="text-sm">
+                Log in
+            </button>
+            {isModalOpen && <AuthModal onClose={() => setModalOpen(false)} />}
+        </>
+    );
+}
