@@ -9,6 +9,13 @@ export function useLogout() {
 
     return useMutation({
         mutationFn: logout,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["me"] }),
+        onSuccess: async () => {
+            console.log("logout onSuccess fired, invalidating...");
+            await queryClient.invalidateQueries({ queryKey: ["me"] });
+            console.log("invalidation completed");
+        },
+        onError: (err) => {
+            console.log("logout onError", err);
+        },
     });
 }
