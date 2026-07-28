@@ -1,3 +1,3 @@
-export { requestCode, verifyCode, getMe, logout } from "./api/authApi";
+export { requestCode, verifyCode } from "./api/authApi";
 export { useMe } from "./model/useMe";
-export type { Me } from "./model/types";
+export { useLogout } from "./model/useLogout";
