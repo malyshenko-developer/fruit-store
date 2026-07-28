@@ -11,12 +11,6 @@ export function ProfileContent() {
     const router = useRouter();
     const { data: me, isLoading, isError } = useMe();
 
-    useEffect(() => {
-        if (!isLoading && (isError || !me)) {
-            router.push("/");
-        }
-    }, [isLoading, isError, me, router]);
-
     if (isLoading || !me) {
         return <div className="p-8">Loading...</div>;
     }
