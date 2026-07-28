@@ -21,3 +21,7 @@ export async function verifyCode(email: string, code: string): Promise<void> {
 export async function getMe(): Promise<Me> {
     return apiFetch<Me>("/auth/me");
 }
+
+export async function logout(): Promise<void> {
+    await apiFetch<void>("/auth/logout", { method: "POST" });
+}

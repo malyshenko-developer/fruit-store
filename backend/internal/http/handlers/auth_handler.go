@@ -82,3 +82,8 @@ func (h *AuthHandler) Me(c *gin.Context) {
 
 	c.JSON(200, dto.UserToMeResponse(user))
 }
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	c.SetCookie(config.AuthCookieName, "", -1, "/", "", false, true)
+	c.Status(204)
+}
