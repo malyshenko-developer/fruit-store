@@ -1,15 +1,11 @@
 "use client";
 
-import {useEffect} from "react";
-import {useRouter} from "next/navigation";
-
 import { LogoutButton } from "@/features/logout";
 
 import {useMe} from "@/entities/auth";
 
 export function ProfileContent() {
-    const router = useRouter();
-    const { data: me, isLoading, isError } = useMe();
+    const { data: me, isLoading } = useMe();
 
     if (isLoading || !me) {
         return <div className="p-8">Loading...</div>;
