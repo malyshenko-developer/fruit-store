@@ -10,6 +10,6 @@ export async function requireAuth(): Promise<void> {
     });
 
     if (!res.ok) {
-        redirect("/");
+        redirect("/access-denied");
     }
 }
