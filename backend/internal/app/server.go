@@ -14,23 +14,32 @@ import (
 )
 
 type Server struct {
-	router          *gin.Engine
-	categoryService service.CategoryService
-	productService  service.ProductService
-	cartService     service.CartService
-	authService     service.AuthService
-	jwtSecret       string
-	logger          *slog.Logger
+	router             *gin.Engine
+	categoryService    service.CategoryService
+	productService     service.ProductService
+	cartService        service.CartService
+	authService        service.AuthService
+	yandexOAuthService service.YandexOAuthService
+	jwtSecret          string
+	logger             *slog.Logger
 }
 
-func NewServer(categoryService service.CategoryService, productService service.ProductService, cartService service.CartService, authService service.AuthService, jwtSecret string, logger *slog.Logger) *Server {
+func NewServer(
+	categoryService service.CategoryService,
+	productService service.ProductService,
+	cartService service.CartService,
+	authService service.AuthService,
+	yandexOAuthService service.YandexOAuthService,
+	jwtSecret string,
+	logger *slog.Logger) *Server {
 	s := &Server{
-		categoryService: categoryService,
-		productService:  productService,
-		cartService:     cartService,
-		authService:     authService,
-		jwtSecret:       jwtSecret,
-		logger:          logger,
+		categoryService:    categoryService,
+		productService:     productService,
+		cartService:        cartService,
+		authService:        authService,
+		yandexOAuthService: yandexOAuthService,
+		jwtSecret:          jwtSecret,
+		logger:             logger,
 	}
 	s.setupRouter()
 	return s
@@ -63,7 +72,7 @@ func (s *Server) setupRouter() {
 	categoryHandlers := handlers.NewCategoryHandler(s.categoryService, s.logger)
 	productHandlers := handlers.NewProductHandler(s.productService, s.logger)
 	cartHandlers := handlers.NewCartHandler(s.cartService, s.logger)
-	authHandlers := handlers.NewAuthHandler(s.authService, s.logger)
+	authHandlers := handlers.NewAuthHandler(s.authService, s.yandexOAuthService, s.logger)
 
 	v1 := r.Group("/v1")
 	{
@@ -87,6 +96,7 @@ func (s *Server) setupRouter() {
 		auth.GET("/me", authHandlers.Me)
 		auth.POST("/logout", authHandlers.Logout)
 		auth.POST("/refresh", authHandlers.RefreshToken)
+		auth.GET("/yandex/login", authHandlers.YandexLogin)
 	}
 
 	s.router = r

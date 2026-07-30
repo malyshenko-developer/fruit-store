@@ -13,12 +13,13 @@ import (
 )
 
 type AuthHandler struct {
-	service service.AuthService
-	logger  *slog.Logger
+	service     service.AuthService
+	yandexOAuth service.YandexOAuthService
+	logger      *slog.Logger
 }
 
-func NewAuthHandler(service service.AuthService, logger *slog.Logger) *AuthHandler {
-	return &AuthHandler{service: service, logger: logger}
+func NewAuthHandler(service service.AuthService, yandexOAuth service.YandexOAuthService, logger *slog.Logger) *AuthHandler {
+	return &AuthHandler{service: service, yandexOAuth: yandexOAuth, logger: logger}
 }
 
 func (h *AuthHandler) RequestCode(c *gin.Context) {
@@ -112,4 +113,9 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	c.SetCookie(config.AccessCookieName, "", -1, "/", "", false, true)
 	c.SetCookie(config.RefreshCookieName, "", -1, "/", "", false, true)
 	c.Status(204)
+}
+
+func (h *AuthHandler) YandexLogin(c *gin.Context) {
+	url := h.yandexOAuth.GetAuthorizeURL()
+	c.Redirect(302, url)
 }

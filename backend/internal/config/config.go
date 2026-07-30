@@ -7,12 +7,15 @@ import (
 )
 
 type Config struct {
-	DatabaseURL  string
-	RedisURL     string
-	Port         string
-	LogLevel     string
-	ResendAPIKey string
-	JWTSecret    string
+	DatabaseURL        string
+	RedisURL           string
+	Port               string
+	LogLevel           string
+	ResendAPIKey       string
+	JWTSecret          string
+	YandexClientID     string
+	YandexClientSecret string
+	YandexRedirectURI  string
 }
 
 const (
@@ -53,12 +56,30 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("JWT_SECRET is required")
 	}
 
+	yandexClientID := os.Getenv("YANDEX_CLIENT_ID")
+	if yandexClientID == "" {
+		return nil, fmt.Errorf("YANDEX_CLIENT_ID is required")
+	}
+
+	yandexClientSecret := os.Getenv("YANDEX_CLIENT_SECRET")
+	if yandexClientSecret == "" {
+		return nil, fmt.Errorf("YANDEX_CLIENT_SECRET is required")
+	}
+
+	yandexRedirectURI := os.Getenv("YANDEX_REDIRECT_URI")
+	if yandexRedirectURI == "" {
+		yandexRedirectURI = "http://localhost:8080/v1/auth/yandex/callback"
+	}
+
 	return &Config{
-		DatabaseURL:  dbURL,
-		RedisURL:     redisURL,
-		Port:         port,
-		LogLevel:     logLevel,
-		ResendAPIKey: resendAPIKey,
-		JWTSecret:    jwtSecret,
+		DatabaseURL:        dbURL,
+		RedisURL:           redisURL,
+		Port:               port,
+		LogLevel:           logLevel,
+		ResendAPIKey:       resendAPIKey,
+		JWTSecret:          jwtSecret,
+		YandexClientID:     yandexClientID,
+		YandexClientSecret: yandexClientSecret,
+		YandexRedirectURI:  yandexRedirectURI,
 	}, nil
 }
