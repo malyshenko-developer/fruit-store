@@ -25,6 +25,7 @@ export function EmailStep({ onSuccess, onError, requestCode, serverError }: Prop
     }
 
     return (
+        <>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
             <h2 className="text-lg font-bold mb-4">Log in</h2>
             <input
@@ -45,5 +46,15 @@ export function EmailStep({ onSuccess, onError, requestCode, serverError }: Prop
                 {form.formState.isSubmitting ? "Sending..." : "Send code"}
             </button>
         </form>
+
+        <div className="mt-4 pt-4 border-t">
+            <a
+                href={`${process.env.NEXT_PUBLIC_API_URL}/auth/yandex/login`}
+                className="block text-center border rounded px-4 py-2 text-sm"
+            >
+            Continue with Yandex
+        </a>
+        </div>
+</>
     );
 }
