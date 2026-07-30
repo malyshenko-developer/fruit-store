@@ -10,7 +10,7 @@ import (
 var ErrInsufficientStock = errors.New("insufficient stock")
 
 type CartRepository interface {
-	GetOrCreateBySessionID(ctx context.Context, sessionID string) (*model.Cart, error)
+	GetOrCreate(ctx context.Context, sessionID string, userID *int64) (*model.Cart, error)
 	GetItems(ctx context.Context, cartID int64) ([]*model.CartItemWithVariant, error)
 	AddItem(ctx context.Context, cartID, variantID int64, quantity int) error
 	UpdateQuantity(ctx context.Context, cartID, variantID int64, quantity int) error
@@ -19,10 +19,10 @@ type CartRepository interface {
 }
 
 type CartService interface {
-	GetCart(ctx context.Context, sessionID string) (*model.CartSummary, error)
-	AddItem(ctx context.Context, sessionID string, variantID int64, quantity int) error
-	UpdateQuantity(ctx context.Context, sessionID string, variantID int64, quantity int) error
-	RemoveItem(ctx context.Context, sessionID string, variantID int64) error
+	GetCart(ctx context.Context, sessionID string, userID *int64) (*model.CartSummary, error)
+	AddItem(ctx context.Context, sessionID string, userID *int64, variantID int64, quantity int) error
+	UpdateQuantity(ctx context.Context, sessionID string, userID *int64, variantID int64, quantity int) error
+	RemoveItem(ctx context.Context, sessionID string, userID *int64, variantID int64) error
 }
 
 type cartService struct {
@@ -34,8 +34,8 @@ func NewCartService(repo CartRepository, productRepo ProductRepository) CartServ
 	return &cartService{repo: repo, productRepo: productRepo}
 }
 
-func (s *cartService) GetCart(ctx context.Context, sessionID string) (*model.CartSummary, error) {
-	cart, err := s.repo.GetOrCreateBySessionID(ctx, sessionID)
+func (s *cartService) GetCart(ctx context.Context, sessionID string, userID *int64) (*model.CartSummary, error) {
+	cart, err := s.repo.GetOrCreate(ctx, sessionID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +53,8 @@ func (s *cartService) GetCart(ctx context.Context, sessionID string) (*model.Car
 	return &model.CartSummary{Items: items, Total: total}, nil
 }
 
-func (s *cartService) AddItem(ctx context.Context, sessionID string, variantID int64, quantity int) error {
-	cart, err := s.repo.GetOrCreateBySessionID(ctx, sessionID)
+func (s *cartService) AddItem(ctx context.Context, sessionID string, userID *int64, variantID int64, quantity int) error {
+	cart, err := s.repo.GetOrCreate(ctx, sessionID, userID)
 	if err != nil {
 		return err
 	}
@@ -71,8 +71,8 @@ func (s *cartService) AddItem(ctx context.Context, sessionID string, variantID i
 	return s.repo.AddItem(ctx, cart.ID, variantID, quantity)
 }
 
-func (s *cartService) UpdateQuantity(ctx context.Context, sessionID string, variantID int64, quantity int) error {
-	cart, err := s.repo.GetOrCreateBySessionID(ctx, sessionID)
+func (s *cartService) UpdateQuantity(ctx context.Context, sessionID string, userID *int64, variantID int64, quantity int) error {
+	cart, err := s.repo.GetOrCreate(ctx, sessionID, userID)
 	if err != nil {
 		return err
 	}
@@ -89,8 +89,8 @@ func (s *cartService) UpdateQuantity(ctx context.Context, sessionID string, vari
 	return s.repo.UpdateQuantity(ctx, cart.ID, variantID, quantity)
 }
 
-func (s *cartService) RemoveItem(ctx context.Context, sessionID string, variantID int64) error {
-	cart, err := s.repo.GetOrCreateBySessionID(ctx, sessionID)
+func (s *cartService) RemoveItem(ctx context.Context, sessionID string, userID *int64, variantID int64) error {
+	cart, err := s.repo.GetOrCreate(ctx, sessionID, userID)
 	if err != nil {
 		return err
 	}

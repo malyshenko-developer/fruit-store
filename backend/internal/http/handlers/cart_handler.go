@@ -23,8 +23,9 @@ func NewCartHandler(service service.CartService, logger *slog.Logger) *CartHandl
 
 func (h *CartHandler) GetCart(c *gin.Context) {
 	sessionID := middleware.GetSessionID(c)
+	userID := getOptionalUserID(c)
 
-	cart, err := h.service.GetCart(c.Request.Context(), sessionID)
+	cart, err := h.service.GetCart(c.Request.Context(), sessionID, userID)
 	if err != nil {
 		h.logger.Error("failed to fetch cart", "error", err)
 		writeInternalError(c, "failed to fetch cart")
@@ -36,6 +37,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 
 func (h *CartHandler) AddItem(c *gin.Context) {
 	sessionID := middleware.GetSessionID(c)
+	userID := getOptionalUserID(c)
 
 	var req dto.AddItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -43,7 +45,7 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 		return
 	}
 
-	err := h.service.AddItem(c.Request.Context(), sessionID, req.VariantID, req.Quantity)
+	err := h.service.AddItem(c.Request.Context(), sessionID, userID, req.VariantID, req.Quantity)
 	if err != nil {
 		if errors.Is(err, service.ErrInsufficientStock) {
 			writeBadRequest(c, "insufficient stock")
@@ -63,6 +65,7 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 
 func (h *CartHandler) UpdateQuantity(c *gin.Context) {
 	sessionID := middleware.GetSessionID(c)
+	userID := getOptionalUserID(c)
 
 	variantID, err := strconv.ParseInt(c.Param("variantId"), 10, 64)
 	if err != nil {
@@ -76,7 +79,7 @@ func (h *CartHandler) UpdateQuantity(c *gin.Context) {
 		return
 	}
 
-	err = h.service.UpdateQuantity(c.Request.Context(), sessionID, variantID, req.Quantity)
+	err = h.service.UpdateQuantity(c.Request.Context(), sessionID, userID, variantID, req.Quantity)
 	if err != nil {
 		if errors.Is(err, service.ErrInsufficientStock) {
 			writeBadRequest(c, "insufficient stock")
@@ -92,6 +95,7 @@ func (h *CartHandler) UpdateQuantity(c *gin.Context) {
 
 func (h *CartHandler) RemoveItem(c *gin.Context) {
 	sessionID := middleware.GetSessionID(c)
+	userID := getOptionalUserID(c)
 
 	variantID, err := strconv.ParseInt(c.Param("variantId"), 10, 64)
 	if err != nil {
@@ -99,11 +103,19 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.RemoveItem(c.Request.Context(), sessionID, variantID); err != nil {
+	if err := h.service.RemoveItem(c.Request.Context(), sessionID, userID, variantID); err != nil {
 		h.logger.Error("failed to remove cart item", "error", err, "variant_id", variantID)
 		writeInternalError(c, "failed to remove item")
 		return
 	}
 
 	c.Status(204)
+}
+
+func getOptionalUserID(c *gin.Context) *int64 {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		return nil
+	}
+	return &userID
 }

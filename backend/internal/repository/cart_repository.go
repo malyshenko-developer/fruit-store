@@ -18,22 +18,34 @@ func NewCartRepository(pool *pgxpool.Pool) *CartRepository {
 	return &CartRepository{pool: pool}
 }
 
-func (r *CartRepository) GetOrCreateBySessionID(ctx context.Context, sessionID string) (*model.Cart, error) {
-	const selectQuery = `SELECT id, user_id, session_id FROM carts WHERE session_id = $1`
+func (r *CartRepository) GetOrCreate(ctx context.Context, sessionID string, userID *int64) (*model.Cart, error) {
+	if userID != nil {
+		const selectByUserQuery = `SELECT id, user_id, session_id FROM carts WHERE user_id = $1`
+
+		var cart model.Cart
+		err := r.pool.QueryRow(ctx, selectByUserQuery, *userID).Scan(&cart.ID, &cart.UserID, &cart.SessionID)
+		if err == nil {
+			return &cart, nil
+		}
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return nil, err
+		}
+	}
+
+	const selectBySessionQuery = `SELECT id, user_id, session_id FROM carts WHERE session_id = $1`
 
 	var cart model.Cart
-	err := r.pool.QueryRow(ctx, selectQuery, sessionID).Scan(&cart.ID, &cart.UserID, &cart.SessionID)
+	err := r.pool.QueryRow(ctx, selectBySessionQuery, sessionID).Scan(&cart.ID, &cart.UserID, &cart.SessionID)
 	if err == nil {
 		return &cart, nil
 	}
-
 	if !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
 
-	const insertQuery = `INSERT INTO carts (session_id) VALUES ($1) RETURNING id, user_id, session_id`
+	const insertQuery = `INSERT INTO carts (session_id, user_id) VALUES ($1, $2) RETURNING id, user_id, session_id`
 
-	err = r.pool.QueryRow(ctx, insertQuery, sessionID).Scan(&cart.ID, &cart.UserID, &cart.SessionID)
+	err = r.pool.QueryRow(ctx, insertQuery, sessionID, userID).Scan(&cart.ID, &cart.UserID, &cart.SessionID)
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +126,49 @@ func (r *CartRepository) RemoveItem(ctx context.Context, cartID, variantID int64
 }
 
 func (r *CartRepository) AttachToUser(ctx context.Context, sessionID string, userID int64) error {
-	const q = `
-		UPDATE carts
-		SET user_id = $2
-		WHERE session_id = $1 AND user_id IS NULL`
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 
-	_, err := r.pool.Exec(ctx, q, sessionID, userID)
-	return err
+	var guestCartID int64
+	err = tx.QueryRow(ctx, `SELECT id FROM carts WHERE session_id = $1 AND user_id IS NULL`, sessionID).Scan(&guestCartID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return tx.Commit(ctx)
+	}
+	if err != nil {
+		return err
+	}
+
+	var existingUserCartID int64
+	err = tx.QueryRow(ctx, `SELECT id FROM carts WHERE user_id = $1 AND id != $2`, userID, guestCartID).Scan(&existingUserCartID)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		_, err = tx.Exec(ctx, `UPDATE carts SET user_id = $1 WHERE id = $2`, userID, guestCartID)
+		if err != nil {
+			return err
+		}
+		return tx.Commit(ctx)
+	}
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, `
+		INSERT INTO cart_items (cart_id, variant_id, quantity)
+		SELECT $1, variant_id, quantity FROM cart_items WHERE cart_id = $2
+		ON CONFLICT (cart_id, variant_id)
+		DO UPDATE SET quantity = cart_items.quantity + EXCLUDED.quantity`,
+		existingUserCartID, guestCartID)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, `DELETE FROM carts WHERE id = $1`, guestCartID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }
