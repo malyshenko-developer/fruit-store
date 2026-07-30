@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
+	"github.com/malyshenko-developer/fruit-store/internal/apperr"
 	"github.com/malyshenko-developer/fruit-store/internal/config"
 	"github.com/malyshenko-developer/fruit-store/internal/http/dto"
 	"github.com/malyshenko-developer/fruit-store/internal/http/middleware"
@@ -50,7 +51,7 @@ func (h *AuthHandler) VerifyCode(c *gin.Context) {
 
 	sessionID := middleware.GetSessionID(c)
 
-	token, err := h.service.VerifyCode(c.Request.Context(), req.Email, req.Code, sessionID)
+	tokens, err := h.service.VerifyCode(c.Request.Context(), req.Email, req.Code, sessionID)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidCode) {
 			writeBadRequest(c, "invalid or expired code")
@@ -61,9 +62,33 @@ func (h *AuthHandler) VerifyCode(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(config.AuthCookieName, token, int(config.AuthTokenTTL.Seconds()), "/", "", false, true)
+	c.SetCookie(config.AccessCookieName, tokens.AccessToken, int(config.AccessTokenTTL.Seconds()), "/", "", false, true)
+	c.SetCookie(config.RefreshCookieName, tokens.RefreshToken, int(config.RefreshTokenTTL.Seconds()), "/", "", false, true)
 
-	c.JSON(200, dto.TokenToResponse(token))
+	c.Status(204)
+}
+
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	refreshToken, err := c.Cookie(config.RefreshCookieName)
+	if err != nil || refreshToken == "" {
+		writeUnauthorized(c, "no refresh token")
+		return
+	}
+
+	accessToken, err := h.service.RefreshAccessToken(c.Request.Context(), refreshToken)
+	if err != nil {
+		if errors.Is(err, apperr.ErrNotFound) {
+			writeUnauthorized(c, "invalid or expired refresh token")
+			return
+		}
+		h.logger.Error("failed to refresh access token", "error", err)
+		writeInternalError(c, "failed to refresh token")
+		return
+	}
+
+	c.SetCookie(config.AccessCookieName, accessToken, int(config.AccessTokenTTL.Seconds()), "/", "", false, true)
+
+	c.Status(204)
 }
 
 func (h *AuthHandler) Me(c *gin.Context) {
@@ -84,6 +109,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	c.SetCookie(config.AuthCookieName, "", -1, "/", "", false, true)
+	c.SetCookie(config.AccessCookieName, "", -1, "/", "", false, true)
+	c.SetCookie(config.RefreshCookieName, "", -1, "/", "", false, true)
 	c.Status(204)
 }

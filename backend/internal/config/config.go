@@ -16,8 +16,10 @@ type Config struct {
 }
 
 const (
-	AuthCookieName = "auth_token"
-	AuthTokenTTL   = 30 * 24 * time.Hour
+	AccessCookieName  = "access_token"
+	RefreshCookieName = "refresh_token"
+	AccessTokenTTL    = 15 * time.Minute
+	RefreshTokenTTL   = 30 * 24 * time.Hour
 )
 
 func Load() (*Config, error) {

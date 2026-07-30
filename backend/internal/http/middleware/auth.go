@@ -10,7 +10,7 @@ const userIDContextKey = "user_id"
 
 func OptionalAuth(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString, err := c.Cookie(config.AuthCookieName)
+		tokenString, err := c.Cookie(config.AccessCookieName)
 		if err != nil || tokenString == "" {
 			c.Next()
 			return

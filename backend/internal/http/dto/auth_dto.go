@@ -11,14 +11,6 @@ type VerifyCodeRequest struct {
 	Code  string `json:"code" binding:"required,len=6"`
 }
 
-type VerifyCodeResponse struct {
-	Token string `json:"token"`
-}
-
-func TokenToResponse(token string) *VerifyCodeResponse {
-	return &VerifyCodeResponse{Token: token}
-}
-
 type MeResponse struct {
 	ID    int64  `json:"id"`
 	Email string `json:"email"`

@@ -53,10 +53,11 @@ func main() {
 	cartService := service.NewCartService(cartRepo, productRepo)
 
 	userRepo := repository.NewUserRepository(pool)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(pool)
 
 	otpService := service.NewOTPService(redisClient)
 	emailService := service.NewEmailService(cfg.ResendAPIKey)
-	authService := service.NewAuthService(userRepo, cartRepo, otpService, emailService, cfg.JWTSecret)
+	authService := service.NewAuthService(userRepo, cartRepo, refreshTokenRepo, otpService, emailService, cfg.JWTSecret)
 
 	server := app.NewServer(categoryService, productService, cartService, authService, cfg.JWTSecret, appLogger)
 

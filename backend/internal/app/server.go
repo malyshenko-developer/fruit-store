@@ -86,6 +86,7 @@ func (s *Server) setupRouter() {
 		auth.POST("/email/verify", authHandlers.VerifyCode)
 		auth.GET("/me", authHandlers.Me)
 		auth.POST("/logout", authHandlers.Logout)
+		auth.POST("/refresh", authHandlers.RefreshToken)
 	}
 
 	s.router = r
