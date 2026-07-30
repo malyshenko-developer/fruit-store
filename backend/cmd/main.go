@@ -58,7 +58,7 @@ func main() {
 	otpService := service.NewOTPService(redisClient)
 	emailService := service.NewEmailService(cfg.ResendAPIKey)
 	authService := service.NewAuthService(userRepo, cartRepo, refreshTokenRepo, otpService, emailService, cfg.JWTSecret)
-	yandexOAuthService := service.NewYandexOAuthService(cfg.YandexClientID, cfg.YandexRedirectURI)
+	yandexOAuthService := service.NewYandexOAuthService(cfg.YandexClientID, cfg.YandexClientSecret, cfg.YandexRedirectURI)
 
 	server := app.NewServer(categoryService, productService, cartService, authService, yandexOAuthService, cfg.JWTSecret, appLogger)
 

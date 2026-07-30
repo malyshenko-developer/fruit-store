@@ -119,3 +119,39 @@ func (h *AuthHandler) YandexLogin(c *gin.Context) {
 	url := h.yandexOAuth.GetAuthorizeURL()
 	c.Redirect(302, url)
 }
+
+func (h *AuthHandler) YandexCallback(c *gin.Context) {
+	code := c.Query("code")
+	if code == "" {
+		writeBadRequest(c, "missing code")
+		return
+	}
+
+	yandexAccessToken, err := h.yandexOAuth.ExchangeCode(code)
+	if err != nil {
+		h.logger.Error("failed to exchange yandex code", "error", err)
+		writeInternalError(c, "failed to authenticate with yandex")
+		return
+	}
+
+	userInfo, err := h.yandexOAuth.GetUserInfo(yandexAccessToken)
+	if err != nil {
+		h.logger.Error("failed to fetch yandex user info", "error", err)
+		writeInternalError(c, "failed to authenticate with yandex")
+		return
+	}
+
+	sessionID := middleware.GetSessionID(c)
+
+	tokens, err := h.service.LoginWithYandex(c.Request.Context(), userInfo.Email, sessionID)
+	if err != nil {
+		h.logger.Error("failed to login with yandex", "error", err, "email", userInfo.Email)
+		writeInternalError(c, "failed to authenticate with yandex")
+		return
+	}
+
+	c.SetCookie(config.AccessCookieName, tokens.AccessToken, int(config.AccessTokenTTL.Seconds()), "/", "", false, true)
+	c.SetCookie(config.RefreshCookieName, tokens.RefreshToken, int(config.RefreshTokenTTL.Seconds()), "/", "", false, true)
+
+	c.Redirect(302, "http://localhost:3000/")
+}

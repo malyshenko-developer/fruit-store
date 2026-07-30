@@ -97,6 +97,7 @@ func (s *Server) setupRouter() {
 		auth.POST("/logout", authHandlers.Logout)
 		auth.POST("/refresh", authHandlers.RefreshToken)
 		auth.GET("/yandex/login", authHandlers.YandexLogin)
+		auth.GET("/yandex/callback", authHandlers.YandexCallback)
 	}
 
 	s.router = r

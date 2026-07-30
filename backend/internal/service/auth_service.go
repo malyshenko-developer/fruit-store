@@ -35,6 +35,7 @@ type AuthService interface {
 	VerifyCode(ctx context.Context, email, code, sessionID string) (*AuthTokens, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (string, error)
 	GetUserByID(ctx context.Context, userID int64) (*model.User, error)
+	LoginWithYandex(ctx context.Context, email, sessionID string) (*AuthTokens, error)
 }
 
 type authService struct {
@@ -146,4 +147,24 @@ func generateRandomToken() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+func (s *authService) LoginWithYandex(ctx context.Context, email, sessionID string) (*AuthTokens, error) {
+	user, err := s.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		if !errors.Is(err, apperr.ErrNotFound) {
+			return nil, err
+		}
+
+		user, err = s.userRepo.Create(ctx, email)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err := s.cartRepo.AttachToUser(ctx, sessionID, user.ID); err != nil {
+		return nil, err
+	}
+
+	return s.issueTokens(ctx, user.ID)
 }
