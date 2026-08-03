@@ -22,6 +22,16 @@ func NewOrderRepository(pool *pgxpool.Pool) *OrderRepository {
 }
 
 func (r *OrderRepository) CreateFromCart(ctx context.Context, input model.CreateOrderInput) (*model.Order, error) {
+	if input.StripePaymentIntentID != "" {
+		existing, err := r.findByPaymentIntentID(ctx, input.StripePaymentIntentID)
+		if err != nil && !errors.Is(err, apperr.ErrNotFound) {
+			return nil, err
+		}
+		if existing != nil {
+			return existing, nil
+		}
+	}
+
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
 		return nil, err
@@ -83,6 +93,21 @@ func (r *OrderRepository) CreateFromCart(ctx context.Context, input model.Create
 	return order, nil
 }
 
+func (r *OrderRepository) findByPaymentIntentID(ctx context.Context, paymentIntentID string) (*model.Order, error) {
+	var order model.Order
+	err := r.pool.QueryRow(ctx, `
+		SELECT id, order_number, user_id, email, full_name, shipping_address, status, total, stripe_payment_intent_id, created_at
+		FROM orders WHERE stripe_payment_intent_id = $1`, paymentIntentID,
+	).Scan(&order.ID, &order.OrderNumber, &order.UserID, &order.Email, &order.FullName, &order.ShippingAddress, &order.Status, &order.Total, &order.StripePaymentIntentID, &order.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperr.ErrNotFound
+		}
+		return nil, err
+	}
+	return &order, nil
+}
+
 func (r *OrderRepository) getCartItemsForUpdate(ctx context.Context, tx pgx.Tx, cartID int64) ([]*model.CartItemWithVariant, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT
@@ -125,13 +150,18 @@ func (r *OrderRepository) getCartItemsForUpdate(ctx context.Context, tx pgx.Tx, 
 }
 
 func (r *OrderRepository) insertOrder(ctx context.Context, tx pgx.Tx, input model.CreateOrderInput, orderNumber string, total float64) (*model.Order, error) {
+	var stripePaymentIntentID *string
+	if input.StripePaymentIntentID != "" {
+		stripePaymentIntentID = &input.StripePaymentIntentID
+	}
+
 	var order model.Order
 	err := tx.QueryRow(ctx, `
-		INSERT INTO orders (order_number, user_id, email, full_name, shipping_address, status, total)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, order_number, user_id, email, full_name, shipping_address, status, total, created_at`,
-		orderNumber, input.UserID, input.Email, input.FullName, input.ShippingAddress, input.Status, total,
-	).Scan(&order.ID, &order.OrderNumber, &order.UserID, &order.Email, &order.FullName, &order.ShippingAddress, &order.Status, &order.Total, &order.CreatedAt)
+		INSERT INTO orders (order_number, user_id, email, full_name, shipping_address, status, total, stripe_payment_intent_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id, order_number, user_id, email, full_name, shipping_address, status, total, stripe_payment_intent_id, created_at`,
+		orderNumber, input.UserID, input.Email, input.FullName, input.ShippingAddress, input.Status, total, stripePaymentIntentID,
+	).Scan(&order.ID, &order.OrderNumber, &order.UserID, &order.Email, &order.FullName, &order.ShippingAddress, &order.Status, &order.Total, &order.StripePaymentIntentID, &order.CreatedAt)
 	if err != nil {
 		return nil, err
 	}

@@ -64,12 +64,13 @@ func (h *WebhookHandler) HandleStripeWebhook(c *gin.Context) {
 	}
 
 	input := model.CreateOrderInput{
-		SessionID:       metadata["session_id"],
-		UserID:          userID,
-		Email:           metadata["email"],
-		FullName:        metadata["full_name"],
-		ShippingAddress: metadata["shipping_address"],
-		Status:          model.OrderStatusPaid,
+		SessionID:             metadata["session_id"],
+		UserID:                userID,
+		Email:                 metadata["email"],
+		FullName:              metadata["full_name"],
+		ShippingAddress:       metadata["shipping_address"],
+		Status:                model.OrderStatusPaid,
+		StripePaymentIntentID: paymentIntent.ID,
 	}
 
 	_, err = h.orderService.CreateFromCart(c.Request.Context(), input)
