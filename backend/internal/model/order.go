@@ -48,4 +48,5 @@ type CreateOrderInput struct {
 	Email           string
 	FullName        string
 	ShippingAddress string
+	Status          string
 }

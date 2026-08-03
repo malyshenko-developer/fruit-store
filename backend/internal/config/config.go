@@ -7,16 +7,17 @@ import (
 )
 
 type Config struct {
-	DatabaseURL        string
-	RedisURL           string
-	Port               string
-	LogLevel           string
-	ResendAPIKey       string
-	JWTSecret          string
-	YandexClientID     string
-	YandexClientSecret string
-	YandexRedirectURI  string
-	StripeSecretKey    string
+	DatabaseURL         string
+	RedisURL            string
+	Port                string
+	LogLevel            string
+	ResendAPIKey        string
+	JWTSecret           string
+	YandexClientID      string
+	YandexClientSecret  string
+	YandexRedirectURI   string
+	StripeSecretKey     string
+	StripeWebhookSecret string
 }
 
 const (
@@ -77,16 +78,22 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("STRIPE_SECRET_KEY is required")
 	}
 
+	stripeWebhookSecret := os.Getenv("STRIPE_WEBHOOK_SECRET")
+	if stripeWebhookSecret == "" {
+		return nil, fmt.Errorf("STRIPE_WEBHOOK_SECRET is required")
+	}
+
 	return &Config{
-		DatabaseURL:        dbURL,
-		RedisURL:           redisURL,
-		Port:               port,
-		LogLevel:           logLevel,
-		ResendAPIKey:       resendAPIKey,
-		JWTSecret:          jwtSecret,
-		YandexClientID:     yandexClientID,
-		YandexClientSecret: yandexClientSecret,
-		YandexRedirectURI:  yandexRedirectURI,
-		StripeSecretKey:    stripeSecretKey,
+		DatabaseURL:         dbURL,
+		RedisURL:            redisURL,
+		Port:                port,
+		LogLevel:            logLevel,
+		ResendAPIKey:        resendAPIKey,
+		JWTSecret:           jwtSecret,
+		YandexClientID:      yandexClientID,
+		YandexClientSecret:  yandexClientSecret,
+		YandexRedirectURI:   yandexRedirectURI,
+		StripeSecretKey:     stripeSecretKey,
+		StripeWebhookSecret: stripeWebhookSecret,
 	}, nil
 }

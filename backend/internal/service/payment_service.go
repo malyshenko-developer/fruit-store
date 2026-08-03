@@ -21,6 +21,10 @@ func (s *paymentService) CreatePaymentIntent(amountCents int64, metadata map[str
 		Amount:   stripe.Int64(amountCents),
 		Currency: stripe.String(string(stripe.CurrencyUSD)),
 		Metadata: metadata,
+		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
+			Enabled:        stripe.Bool(true),
+			AllowRedirects: stripe.String("never"),
+		},
 	}
 
 	pi, err := paymentintent.New(params)

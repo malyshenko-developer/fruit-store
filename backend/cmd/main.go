@@ -65,7 +65,7 @@ func main() {
 
 	paymentService := service.NewPaymentService(cfg.StripeSecretKey)
 
-	server := app.NewServer(categoryService, productService, cartService, authService, yandexOAuthService, orderService, paymentService, cfg.JWTSecret, appLogger)
+	server := app.NewServer(categoryService, productService, cartService, authService, yandexOAuthService, orderService, paymentService, cfg.JWTSecret, cfg.StripeWebhookSecret, appLogger)
 
 	appLogger.Info("starting server", "port", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {

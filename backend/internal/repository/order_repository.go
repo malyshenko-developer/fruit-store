@@ -127,10 +127,10 @@ func (r *OrderRepository) getCartItemsForUpdate(ctx context.Context, tx pgx.Tx, 
 func (r *OrderRepository) insertOrder(ctx context.Context, tx pgx.Tx, input model.CreateOrderInput, orderNumber string, total float64) (*model.Order, error) {
 	var order model.Order
 	err := tx.QueryRow(ctx, `
-		INSERT INTO orders (order_number, user_id, email, full_name, shipping_address, total)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO orders (order_number, user_id, email, full_name, shipping_address, status, total)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, order_number, user_id, email, full_name, shipping_address, status, total, created_at`,
-		orderNumber, input.UserID, input.Email, input.FullName, input.ShippingAddress, total,
+		orderNumber, input.UserID, input.Email, input.FullName, input.ShippingAddress, input.Status, total,
 	).Scan(&order.ID, &order.OrderNumber, &order.UserID, &order.Email, &order.FullName, &order.ShippingAddress, &order.Status, &order.Total, &order.CreatedAt)
 	if err != nil {
 		return nil, err

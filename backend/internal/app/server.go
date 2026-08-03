@@ -14,16 +14,17 @@ import (
 )
 
 type Server struct {
-	router             *gin.Engine
-	categoryService    service.CategoryService
-	productService     service.ProductService
-	cartService        service.CartService
-	authService        service.AuthService
-	yandexOAuthService service.YandexOAuthService
-	orderService       service.OrderService
-	paymentService     service.PaymentService
-	jwtSecret          string
-	logger             *slog.Logger
+	router              *gin.Engine
+	categoryService     service.CategoryService
+	productService      service.ProductService
+	cartService         service.CartService
+	authService         service.AuthService
+	yandexOAuthService  service.YandexOAuthService
+	orderService        service.OrderService
+	paymentService      service.PaymentService
+	jwtSecret           string
+	stripeWebhookSecret string
+	logger              *slog.Logger
 }
 
 func NewServer(
@@ -35,17 +36,20 @@ func NewServer(
 	orderService service.OrderService,
 	paymentService service.PaymentService,
 	jwtSecret string,
-	logger *slog.Logger) *Server {
+	stripeWebhookSecret string,
+	logger *slog.Logger,
+) *Server {
 	s := &Server{
-		categoryService:    categoryService,
-		productService:     productService,
-		cartService:        cartService,
-		authService:        authService,
-		yandexOAuthService: yandexOAuthService,
-		orderService:       orderService,
-		paymentService:     paymentService,
-		jwtSecret:          jwtSecret,
-		logger:             logger,
+		categoryService:     categoryService,
+		productService:      productService,
+		cartService:         cartService,
+		authService:         authService,
+		yandexOAuthService:  yandexOAuthService,
+		orderService:        orderService,
+		paymentService:      paymentService,
+		jwtSecret:           jwtSecret,
+		stripeWebhookSecret: stripeWebhookSecret,
+		logger:              logger,
 	}
 	s.setupRouter()
 	return s
@@ -81,6 +85,9 @@ func (s *Server) setupRouter() {
 	authHandlers := handlers.NewAuthHandler(s.authService, s.yandexOAuthService, s.logger)
 	orderHandlers := handlers.NewOrderHandler(s.orderService, s.logger)
 	checkoutHandlers := handlers.NewCheckoutHandler(s.cartService, s.paymentService, s.logger)
+	webhookHandlers := handlers.NewWebhookHandler(s.orderService, s.stripeWebhookSecret, s.logger)
+
+	r.POST("/v1/webhooks/stripe", webhookHandlers.HandleStripeWebhook)
 
 	v1 := r.Group("/v1")
 	{
