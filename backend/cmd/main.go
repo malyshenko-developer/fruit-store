@@ -63,7 +63,9 @@ func main() {
 	orderRepo := repository.NewOrderRepository(pool)
 	orderService := service.NewOrderService(orderRepo, emailService)
 
-	server := app.NewServer(categoryService, productService, cartService, authService, yandexOAuthService, orderService, cfg.JWTSecret, appLogger)
+	paymentService := service.NewPaymentService(cfg.StripeSecretKey)
+
+	server := app.NewServer(categoryService, productService, cartService, authService, yandexOAuthService, orderService, paymentService, cfg.JWTSecret, appLogger)
 
 	appLogger.Info("starting server", "port", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {

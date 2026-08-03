@@ -16,6 +16,7 @@ type Config struct {
 	YandexClientID     string
 	YandexClientSecret string
 	YandexRedirectURI  string
+	StripeSecretKey    string
 }
 
 const (
@@ -71,6 +72,11 @@ func Load() (*Config, error) {
 		yandexRedirectURI = "http://localhost:8080/v1/auth/yandex/callback"
 	}
 
+	stripeSecretKey := os.Getenv("STRIPE_SECRET_KEY")
+	if stripeSecretKey == "" {
+		return nil, fmt.Errorf("STRIPE_SECRET_KEY is required")
+	}
+
 	return &Config{
 		DatabaseURL:        dbURL,
 		RedisURL:           redisURL,
@@ -81,5 +87,6 @@ func Load() (*Config, error) {
 		YandexClientID:     yandexClientID,
 		YandexClientSecret: yandexClientSecret,
 		YandexRedirectURI:  yandexRedirectURI,
+		StripeSecretKey:    stripeSecretKey,
 	}, nil
 }

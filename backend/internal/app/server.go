@@ -21,6 +21,7 @@ type Server struct {
 	authService        service.AuthService
 	yandexOAuthService service.YandexOAuthService
 	orderService       service.OrderService
+	paymentService     service.PaymentService
 	jwtSecret          string
 	logger             *slog.Logger
 }
@@ -32,6 +33,7 @@ func NewServer(
 	authService service.AuthService,
 	yandexOAuthService service.YandexOAuthService,
 	orderService service.OrderService,
+	paymentService service.PaymentService,
 	jwtSecret string,
 	logger *slog.Logger) *Server {
 	s := &Server{
@@ -41,6 +43,7 @@ func NewServer(
 		authService:        authService,
 		yandexOAuthService: yandexOAuthService,
 		orderService:       orderService,
+		paymentService:     paymentService,
 		jwtSecret:          jwtSecret,
 		logger:             logger,
 	}
@@ -77,6 +80,7 @@ func (s *Server) setupRouter() {
 	cartHandlers := handlers.NewCartHandler(s.cartService, s.logger)
 	authHandlers := handlers.NewAuthHandler(s.authService, s.yandexOAuthService, s.logger)
 	orderHandlers := handlers.NewOrderHandler(s.orderService, s.logger)
+	checkoutHandlers := handlers.NewCheckoutHandler(s.cartService, s.paymentService, s.logger)
 
 	v1 := r.Group("/v1")
 	{
@@ -105,6 +109,9 @@ func (s *Server) setupRouter() {
 
 		orders := v1.Group("/orders")
 		orders.POST("", orderHandlers.Create)
+
+		checkout := v1.Group("/checkout")
+		checkout.POST("/create-payment-intent", checkoutHandlers.CreatePaymentIntent)
 	}
 
 	s.router = r
