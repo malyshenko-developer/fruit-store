@@ -60,7 +60,10 @@ func main() {
 	authService := service.NewAuthService(userRepo, cartRepo, refreshTokenRepo, otpService, emailService, cfg.JWTSecret)
 	yandexOAuthService := service.NewYandexOAuthService(cfg.YandexClientID, cfg.YandexClientSecret, cfg.YandexRedirectURI)
 
-	server := app.NewServer(categoryService, productService, cartService, authService, yandexOAuthService, cfg.JWTSecret, appLogger)
+	orderRepo := repository.NewOrderRepository(pool)
+	orderService := service.NewOrderService(orderRepo, emailService)
+
+	server := app.NewServer(categoryService, productService, cartService, authService, yandexOAuthService, orderService, cfg.JWTSecret, appLogger)
 
 	appLogger.Info("starting server", "port", cfg.Port)
 	if err := server.Router().Run(":" + cfg.Port); err != nil {

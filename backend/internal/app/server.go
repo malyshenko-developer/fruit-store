@@ -20,6 +20,7 @@ type Server struct {
 	cartService        service.CartService
 	authService        service.AuthService
 	yandexOAuthService service.YandexOAuthService
+	orderService       service.OrderService
 	jwtSecret          string
 	logger             *slog.Logger
 }
@@ -30,6 +31,7 @@ func NewServer(
 	cartService service.CartService,
 	authService service.AuthService,
 	yandexOAuthService service.YandexOAuthService,
+	orderService service.OrderService,
 	jwtSecret string,
 	logger *slog.Logger) *Server {
 	s := &Server{
@@ -38,6 +40,7 @@ func NewServer(
 		cartService:        cartService,
 		authService:        authService,
 		yandexOAuthService: yandexOAuthService,
+		orderService:       orderService,
 		jwtSecret:          jwtSecret,
 		logger:             logger,
 	}
@@ -73,6 +76,7 @@ func (s *Server) setupRouter() {
 	productHandlers := handlers.NewProductHandler(s.productService, s.logger)
 	cartHandlers := handlers.NewCartHandler(s.cartService, s.logger)
 	authHandlers := handlers.NewAuthHandler(s.authService, s.yandexOAuthService, s.logger)
+	orderHandlers := handlers.NewOrderHandler(s.orderService, s.logger)
 
 	v1 := r.Group("/v1")
 	{
@@ -98,6 +102,9 @@ func (s *Server) setupRouter() {
 		auth.POST("/refresh", authHandlers.RefreshToken)
 		auth.GET("/yandex/login", authHandlers.YandexLogin)
 		auth.GET("/yandex/callback", authHandlers.YandexCallback)
+
+		orders := v1.Group("/orders")
+		orders.POST("", orderHandlers.Create)
 	}
 
 	s.router = r
