@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const emailSchema = z.object({
-    email: z.string().email("Enter a valid email address"),
+    email: z.email("Enter a valid email address"),
 });
 
 export const codeSchema = z.object({
