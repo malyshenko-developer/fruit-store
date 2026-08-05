@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	defaultLimit = 12
-	maxLimit     = 100
+	defaultLimit      = 12
+	maxLimit          = 100
+	searchResultLimit = 8
 )
 
 var allowedSortFields = map[string]bool{
@@ -44,12 +45,14 @@ type ProductRepository interface {
 	GetVariantsByProductID(ctx context.Context, productID int64) ([]*model.ProductVariant, error)
 	GetVariantByID(ctx context.Context, id int64) (*model.ProductVariant, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
+	Search(ctx context.Context, query string, limit int) ([]*model.ProductListItem, int, error)
 }
 
 type ProductService interface {
 	GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error)
 	GetByID(ctx context.Context, id int64) (*ProductWithVariants, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
+	Search(ctx context.Context, query string) (*model.PaginatedProducts, error)
 }
 
 type productService struct {
@@ -81,6 +84,20 @@ func (s *productService) GetByID(ctx context.Context, id int64) (*ProductWithVar
 
 func (s *productService) GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error) {
 	return s.repo.GetAvailableFilters(ctx, categoryID)
+}
+
+func (s *productService) Search(ctx context.Context, query string) (*model.PaginatedProducts, error) {
+	items, total, err := s.repo.Search(ctx, query, searchResultLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PaginatedProducts{
+		Items: items,
+		Total: total,
+		Page:  1,
+		Limit: searchResultLimit,
+	}, nil
 }
 
 func normalizeListParams(p *model.ListProductsParams) {

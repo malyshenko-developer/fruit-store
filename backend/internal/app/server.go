@@ -97,6 +97,7 @@ func (s *Server) setupRouter() {
 		products := v1.Group("/products")
 		products.GET("", productHandlers.List)
 		products.GET("/filters", productHandlers.GetFilters)
+		products.GET("/search", productHandlers.Search)
 		products.GET("/:id", productHandlers.GetByID)
 
 		cart := v1.Group("/cart")

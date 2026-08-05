@@ -141,3 +141,20 @@ func (h *ProductHandler) GetFilters(c *gin.Context) {
 
 	writeOK(c, dto.ProductFiltersToResponse(filters))
 }
+
+func (h *ProductHandler) Search(c *gin.Context) {
+	query := c.Query("q")
+	if query == "" {
+		writeBadRequest(c, "query parameter 'q' is required")
+		return
+	}
+
+	result, err := h.service.Search(c.Request.Context(), query)
+	if err != nil {
+		h.logger.Error("failed to search products", "error", err, "query", query)
+		writeInternalError(c, "failed to search products")
+		return
+	}
+
+	writeOK(c, dto.PaginatedProductsToResponse(result))
+}

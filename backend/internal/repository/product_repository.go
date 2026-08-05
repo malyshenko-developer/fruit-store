@@ -244,3 +244,50 @@ func (r *ProductRepository) GetVariantByID(ctx context.Context, id int64) (*mode
 
 	return &v, nil
 }
+
+func (r *ProductRepository) Search(ctx context.Context, query string, limit int) ([]*model.ProductListItem, int, error) {
+	const countQuery = `
+		SELECT COUNT(*)
+		FROM product_variants pv
+		JOIN products p ON p.id = pv.product_id
+		WHERE p.name ILIKE '%' || $1 || '%'`
+
+	var total int
+	if err := r.pool.QueryRow(ctx, countQuery, query).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	const q = `
+		SELECT
+			pv.id, p.id, p.category_id, p.name, p.description,
+			COALESCE(pv.image_url, p.image_url), pv.price, pv.attributes
+		FROM product_variants pv
+		JOIN products p ON p.id = pv.product_id
+		WHERE p.name ILIKE '%' || $1 || '%'
+		ORDER BY p.name
+		LIMIT $2`
+
+	rows, err := r.pool.Query(ctx, q, query, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var items []*model.ProductListItem
+	for rows.Next() {
+		var item model.ProductListItem
+		var rawAttributes []byte
+
+		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.ImageURL, &item.Price, &rawAttributes); err != nil {
+			return nil, 0, err
+		}
+
+		if err := json.Unmarshal(rawAttributes, &item.Attributes); err != nil {
+			return nil, 0, err
+		}
+
+		items = append(items, &item)
+	}
+
+	return items, total, rows.Err()
+}
