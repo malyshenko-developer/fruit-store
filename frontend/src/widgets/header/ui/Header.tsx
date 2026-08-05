@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-import {AuthStatus} from "@/features/auth-modal";
+import { AuthStatus } from "@/features/auth-modal";
+import { SearchInput } from "@/features/search-products";
 
-import {CartCounter} from "@/entities/cart";
+import { CartCounter } from "@/entities/cart";
 
 export function Header() {
     return (
@@ -10,6 +11,7 @@ export function Header() {
             <Link href="/" className="font-bold text-xl">
                 Fruit Store
             </Link>
+            <SearchInput />
             <div className="flex items-center gap-4">
                 <AuthStatus />
                 <Link href="/cart" className="text-sm flex items-center">

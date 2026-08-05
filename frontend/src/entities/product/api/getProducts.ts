@@ -47,3 +47,8 @@ export async function getProductFilters(categoryId?: number): Promise<ProductFil
     const query =  categoryId ? `?category_id=${categoryId}` : "";
     return apiFetch<ProductFilters>(`/products/filters${query}`);
 }
+
+export async function searchProducts(query: string): Promise<PaginatedProducts> {
+    const params = new URLSearchParams({ q: query });
+    return apiFetch<PaginatedProducts>(`/products/search?${params.toString()}`);
+}
