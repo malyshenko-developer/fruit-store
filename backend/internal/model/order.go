@@ -33,6 +33,21 @@ type Order struct {
 	CreatedAt             time.Time
 }
 
+type OrderItem struct {
+	ID                int64
+	OrderID           int64
+	VariantID         int64
+	ProductName       string
+	VariantAttributes map[string]interface{}
+	Price             float64
+	Quantity          int
+}
+
+type OrderWithItems struct {
+	Order *Order
+	Items []*OrderItem
+}
+
 type CreateOrderInput struct {
 	SessionID             string
 	UserID                *int64

@@ -59,3 +59,25 @@ func (h *OrderHandler) Create(c *gin.Context) {
 
 	c.JSON(201, dto.OrderToResponse(order))
 }
+
+func (h *OrderHandler) GetMyOrders(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		writeUnauthorized(c, "not authenticated")
+		return
+	}
+
+	orders, err := h.service.GetOrdersByUserID(c.Request.Context(), userID)
+	if err != nil {
+		h.logger.Error("failed to fetch orders", "error", err, "user_id", userID)
+		writeInternalError(c, "failed to fetch orders")
+		return
+	}
+
+	responses := make([]*dto.OrderWithItemsResponse, 0, len(orders))
+	for _, order := range orders {
+		responses = append(responses, dto.OrderWithItemsToResponse(order))
+	}
+
+	c.JSON(200, responses)
+}

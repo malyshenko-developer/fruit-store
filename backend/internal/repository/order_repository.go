@@ -21,6 +21,59 @@ func NewOrderRepository(pool *pgxpool.Pool) *OrderRepository {
 	return &OrderRepository{pool: pool}
 }
 
+func (r *OrderRepository) GetByUserID(ctx context.Context, userID int64) ([]*model.Order, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT id, order_number, user_id, email, full_name, shipping_address, status, total, stripe_payment_intent_id, created_at
+		FROM orders
+		WHERE user_id = $1
+		ORDER BY created_at DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []*model.Order
+	for rows.Next() {
+		var order model.Order
+		if err := rows.Scan(&order.ID, &order.OrderNumber, &order.UserID, &order.Email, &order.FullName, &order.ShippingAddress, &order.Status, &order.Total, &order.StripePaymentIntentID, &order.CreatedAt); err != nil {
+			return nil, err
+		}
+		orders = append(orders, &order)
+	}
+
+	return orders, rows.Err()
+}
+
+func (r *OrderRepository) GetItemsByOrderIDs(ctx context.Context, orderIDs []int64) (map[int64][]*model.OrderItem, error) {
+	if len(orderIDs) == 0 {
+		return map[int64][]*model.OrderItem{}, nil
+	}
+
+	rows, err := r.pool.Query(ctx, `
+		SELECT id, order_id, variant_id, product_name, variant_attributes, price, quantity
+		FROM order_items
+		WHERE order_id = ANY($1)`, orderIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	itemsByOrder := make(map[int64][]*model.OrderItem)
+	for rows.Next() {
+		var item model.OrderItem
+		var rawAttributes []byte
+		if err := rows.Scan(&item.ID, &item.OrderID, &item.VariantID, &item.ProductName, &rawAttributes, &item.Price, &item.Quantity); err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(rawAttributes, &item.VariantAttributes); err != nil {
+			return nil, err
+		}
+		itemsByOrder[item.OrderID] = append(itemsByOrder[item.OrderID], &item)
+	}
+
+	return itemsByOrder, rows.Err()
+}
+
 func (r *OrderRepository) CreateFromCart(ctx context.Context, input model.CreateOrderInput) (*model.Order, error) {
 	if input.StripePaymentIntentID != "" {
 		existing, err := r.findByPaymentIntentID(ctx, input.StripePaymentIntentID)

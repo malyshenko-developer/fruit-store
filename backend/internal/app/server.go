@@ -116,6 +116,7 @@ func (s *Server) setupRouter() {
 
 		orders := v1.Group("/orders")
 		orders.POST("", orderHandlers.Create)
+		orders.GET("/my", orderHandlers.GetMyOrders)
 
 		checkout := v1.Group("/checkout")
 		checkout.POST("/create-payment-intent", checkoutHandlers.CreatePaymentIntent)
