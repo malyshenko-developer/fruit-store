@@ -81,3 +81,24 @@ func (h *OrderHandler) GetMyOrders(c *gin.Context) {
 
 	c.JSON(200, responses)
 }
+
+func (h *OrderHandler) Track(c *gin.Context) {
+	var req dto.TrackOrderRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		writeBadRequest(c, "order_number and email are required")
+		return
+	}
+
+	order, err := h.service.TrackOrder(c.Request.Context(), req.OrderNumber, req.Email)
+	if err != nil {
+		if errors.Is(err, apperr.ErrNotFound) {
+			writeNotFound(c, "order not found")
+			return
+		}
+		h.logger.Error("failed to track order", "error", err)
+		writeInternalError(c, "failed to track order")
+		return
+	}
+
+	c.JSON(200, dto.OrderWithItemsToResponse(order))
+}

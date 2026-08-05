@@ -74,6 +74,23 @@ func (r *OrderRepository) GetItemsByOrderIDs(ctx context.Context, orderIDs []int
 	return itemsByOrder, rows.Err()
 }
 
+func (r *OrderRepository) FindByOrderNumberAndEmail(ctx context.Context, orderNumber, email string) (*model.Order, error) {
+	var order model.Order
+	err := r.pool.QueryRow(ctx, `
+		SELECT id, order_number, user_id, email, full_name, shipping_address, status, total, stripe_payment_intent_id, created_at
+		FROM orders
+		WHERE order_number = $1 AND email = $2`, orderNumber, email,
+	).Scan(&order.ID, &order.OrderNumber, &order.UserID, &order.Email, &order.FullName, &order.ShippingAddress, &order.Status, &order.Total, &order.StripePaymentIntentID, &order.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperr.ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &order, nil
+}
+
 func (r *OrderRepository) CreateFromCart(ctx context.Context, input model.CreateOrderInput) (*model.Order, error) {
 	if input.StripePaymentIntentID != "" {
 		existing, err := r.findByPaymentIntentID(ctx, input.StripePaymentIntentID)

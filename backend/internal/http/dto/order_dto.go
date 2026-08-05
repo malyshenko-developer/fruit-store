@@ -60,3 +60,8 @@ func OrderWithItemsToResponse(o *model.OrderWithItems) *OrderWithItemsResponse {
 		Items:       items,
 	}
 }
+
+type TrackOrderRequest struct {
+	OrderNumber string `form:"order_number" binding:"required"`
+	Email       string `form:"email" binding:"required,email"`
+}

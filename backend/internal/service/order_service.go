@@ -10,11 +10,13 @@ type OrderRepository interface {
 	CreateFromCart(ctx context.Context, input model.CreateOrderInput) (*model.Order, error)
 	GetByUserID(ctx context.Context, userID int64) ([]*model.Order, error)
 	GetItemsByOrderIDs(ctx context.Context, orderIDs []int64) (map[int64][]*model.OrderItem, error)
+	FindByOrderNumberAndEmail(ctx context.Context, orderNumber, email string) (*model.Order, error)
 }
 
 type OrderService interface {
 	CreateFromCart(ctx context.Context, input model.CreateOrderInput) (*model.Order, error)
 	GetOrdersByUserID(ctx context.Context, userID int64) ([]*model.OrderWithItems, error)
+	TrackOrder(ctx context.Context, orderNumber, email string) (*model.OrderWithItems, error)
 }
 
 type orderService struct {
@@ -68,4 +70,18 @@ func (s *orderService) GetOrdersByUserID(ctx context.Context, userID int64) ([]*
 	}
 
 	return result, nil
+}
+
+func (s *orderService) TrackOrder(ctx context.Context, orderNumber, email string) (*model.OrderWithItems, error) {
+	order, err := s.repo.FindByOrderNumberAndEmail(ctx, orderNumber, email)
+	if err != nil {
+		return nil, err
+	}
+
+	itemsByOrder, err := s.repo.GetItemsByOrderIDs(ctx, []int64{order.ID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.OrderWithItems{Order: order, Items: itemsByOrder[order.ID]}, nil
 }
