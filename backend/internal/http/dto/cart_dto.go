@@ -22,9 +22,9 @@ type CartSummaryResponse struct {
 func CartSummaryToResponse(c *model.CartSummary) *CartSummaryResponse {
 	items := make([]*CartItemResponse, 0, len(c.Items))
 	for _, item := range c.Items {
-		imageURL := item.Product.ImageURL
-		if item.Variant.ImageURL != nil {
-			imageURL = *item.Variant.ImageURL
+		var imageURL string
+		if len(item.Images) > 0 {
+			imageURL = item.Images[0].URL
 		}
 
 		items = append(items, &CartItemResponse{

@@ -57,8 +57,8 @@ func (r *CartRepository) GetItems(ctx context.Context, cartID int64) ([]*model.C
 	const q = `
 		SELECT
 			ci.id, ci.cart_id, ci.variant_id, ci.quantity,
-			pv.id, pv.product_id, pv.sku, pv.price, pv.stock, pv.attributes, pv.image_url,
-			p.id, p.category_id, p.name, p.description, p.image_url
+			pv.id, pv.product_id, pv.sku, pv.price, pv.stock, pv.attributes,
+			p.id, p.category_id, p.name, p.description
 		FROM cart_items ci
 		JOIN product_variants pv ON pv.id = ci.variant_id
 		JOIN products p ON p.id = pv.product_id
@@ -80,8 +80,8 @@ func (r *CartRepository) GetItems(ctx context.Context, cartID int64) ([]*model.C
 
 		if err := rows.Scan(
 			&item.ID, &item.CartID, &item.VariantID, &item.Quantity,
-			&variant.ID, &variant.ProductID, &variant.SKU, &variant.Price, &variant.Stock, &rawAttributes, &variant.ImageURL,
-			&product.ID, &product.CategoryID, &product.Name, &product.Description, &product.ImageURL,
+			&variant.ID, &variant.ProductID, &variant.SKU, &variant.Price, &variant.Stock, &rawAttributes,
+			&product.ID, &product.CategoryID, &product.Name, &product.Description,
 		); err != nil {
 			return nil, err
 		}

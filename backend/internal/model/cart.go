@@ -17,6 +17,7 @@ type CartItemWithVariant struct {
 	CartItem *CartItem
 	Variant  *ProductVariant
 	Product  *Product
+	Images   []*VariantImage
 }
 
 type CartSummary struct {

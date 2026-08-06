@@ -83,7 +83,6 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 			p.category_id,
 			p.name,
 			p.description,
-			COALESCE(pv.image_url, p.image_url),
 			pv.price,
 			pv.attributes
 		FROM product_variants pv
@@ -103,7 +102,7 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 		var item model.ProductListItem
 		var rawAttributes []byte
 
-		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.ImageURL, &item.Price, &rawAttributes); err != nil {
+		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.Price, &rawAttributes); err != nil {
 			return nil, err
 		}
 
@@ -127,12 +126,12 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 
 func (r *ProductRepository) GetByID(ctx context.Context, id int64) (*model.Product, error) {
 	const q = `
-		SELECT id, category_id, name, description, image_url
+		SELECT id, category_id, name, description
 		FROM products
 		WHERE id = $1`
 
 	var p model.Product
-	err := r.pool.QueryRow(ctx, q, id).Scan(&p.ID, &p.CategoryID, &p.Name, &p.Description, &p.ImageURL)
+	err := r.pool.QueryRow(ctx, q, id).Scan(&p.ID, &p.CategoryID, &p.Name, &p.Description)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperr.ErrNotFound
@@ -145,7 +144,7 @@ func (r *ProductRepository) GetByID(ctx context.Context, id int64) (*model.Produ
 
 func (r *ProductRepository) GetVariantsByProductID(ctx context.Context, productID int64) ([]*model.ProductVariant, error) {
 	const q = `
-		SELECT id, product_id, sku, price, stock, attributes, image_url
+		SELECT id, product_id, sku, price, stock, attributes
 		FROM product_variants
 		WHERE product_id = $1
 		ORDER BY id`
@@ -161,7 +160,7 @@ func (r *ProductRepository) GetVariantsByProductID(ctx context.Context, productI
 		var v model.ProductVariant
 		var rawAttributes []byte
 
-		if err := rows.Scan(&v.ID, &v.ProductID, &v.SKU, &v.Price, &v.Stock, &rawAttributes, &v.ImageURL); err != nil {
+		if err := rows.Scan(&v.ID, &v.ProductID, &v.SKU, &v.Price, &v.Stock, &rawAttributes); err != nil {
 			return nil, err
 		}
 
@@ -223,14 +222,14 @@ func (r *ProductRepository) GetAvailableFilters(ctx context.Context, categoryID 
 
 func (r *ProductRepository) GetVariantByID(ctx context.Context, id int64) (*model.ProductVariant, error) {
 	const q = `
-		SELECT id, product_id, sku, price, stock, attributes, image_url
+		SELECT id, product_id, sku, price, stock, attributes
 		FROM product_variants
 		WHERE id = $1`
 
 	var v model.ProductVariant
 	var rawAttributes []byte
 
-	err := r.pool.QueryRow(ctx, q, id).Scan(&v.ID, &v.ProductID, &v.SKU, &v.Price, &v.Stock, &rawAttributes, &v.ImageURL)
+	err := r.pool.QueryRow(ctx, q, id).Scan(&v.ID, &v.ProductID, &v.SKU, &v.Price, &v.Stock, &rawAttributes)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperr.ErrNotFound
@@ -243,6 +242,33 @@ func (r *ProductRepository) GetVariantByID(ctx context.Context, id int64) (*mode
 	}
 
 	return &v, nil
+}
+
+func (r *ProductRepository) GetImagesByVariantIDs(ctx context.Context, variantIDs []int64) (map[int64][]*model.VariantImage, error) {
+	if len(variantIDs) == 0 {
+		return map[int64][]*model.VariantImage{}, nil
+	}
+
+	rows, err := r.pool.Query(ctx, `
+		SELECT id, variant_id, url, sort_order
+		FROM product_variant_images
+		WHERE variant_id = ANY($1)
+		ORDER BY variant_id, sort_order`, variantIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	imagesByVariant := make(map[int64][]*model.VariantImage)
+	for rows.Next() {
+		var img model.VariantImage
+		if err := rows.Scan(&img.ID, &img.VariantID, &img.URL, &img.SortOrder); err != nil {
+			return nil, err
+		}
+		imagesByVariant[img.VariantID] = append(imagesByVariant[img.VariantID], &img)
+	}
+
+	return imagesByVariant, rows.Err()
 }
 
 func (r *ProductRepository) Search(ctx context.Context, query string, limit int) ([]*model.ProductListItem, int, error) {
@@ -260,7 +286,7 @@ func (r *ProductRepository) Search(ctx context.Context, query string, limit int)
 	const q = `
 		SELECT
 			pv.id, p.id, p.category_id, p.name, p.description,
-			COALESCE(pv.image_url, p.image_url), pv.price, pv.attributes
+			pv.price, pv.attributes
 		FROM product_variants pv
 		JOIN products p ON p.id = pv.product_id
 		WHERE p.name ILIKE '%' || $1 || '%'
@@ -278,7 +304,7 @@ func (r *ProductRepository) Search(ctx context.Context, query string, limit int)
 		var item model.ProductListItem
 		var rawAttributes []byte
 
-		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.ImageURL, &item.Price, &rawAttributes); err != nil {
+		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.Price, &rawAttributes); err != nil {
 			return nil, 0, err
 		}
 

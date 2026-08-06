@@ -45,8 +45,19 @@ func (s *cartService) GetCart(ctx context.Context, sessionID string, userID *int
 		return nil, err
 	}
 
+	variantIDs := make([]int64, len(items))
+	for i, item := range items {
+		variantIDs[i] = item.Variant.ID
+	}
+
+	imagesByVariant, err := s.productRepo.GetImagesByVariantIDs(ctx, variantIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	var total float64
 	for _, item := range items {
+		item.Images = imagesByVariant[item.Variant.ID]
 		total += item.Variant.Price * float64(item.CartItem.Quantity)
 	}
 

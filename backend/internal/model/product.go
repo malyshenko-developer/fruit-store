@@ -5,7 +5,6 @@ type Product struct {
 	CategoryID  int64
 	Name        string
 	Description string
-	ImageURL    string
 }
 
 type ProductListItem struct {
@@ -14,7 +13,6 @@ type ProductListItem struct {
 	CategoryID  int64
 	Name        string
 	Description string
-	ImageURL    string
 	Price       float64
 	Attributes  map[string]interface{}
 }
@@ -43,4 +41,28 @@ type PaginatedProducts struct {
 	Total int
 	Page  int
 	Limit int
+}
+
+type VariantImage struct {
+	ID        int64
+	VariantID int64
+	URL       string
+	SortOrder int
+}
+
+type ProductListItemWithImages struct {
+	Item   *ProductListItem
+	Images []*VariantImage
+}
+
+type PaginatedProductsWithImages struct {
+	Items []*ProductListItemWithImages
+	Total int
+	Page  int
+	Limit int
+}
+
+type ProductVariantWithImages struct {
+	Variant *ProductVariant
+	Images  []*VariantImage
 }

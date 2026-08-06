@@ -7,5 +7,4 @@ type ProductVariant struct {
 	Price      float64
 	Stock      int
 	Attributes map[string]interface{}
-	ImageURL   *string
 }

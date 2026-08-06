@@ -5,27 +5,40 @@ import (
 	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
 
+type ImageResponse struct {
+	URL       string `json:"url"`
+	SortOrder int    `json:"sort_order"`
+}
+
+func imagesToResponse(images []*model.VariantImage) []*ImageResponse {
+	result := make([]*ImageResponse, 0, len(images))
+	for _, img := range images {
+		result = append(result, &ImageResponse{URL: img.URL, SortOrder: img.SortOrder})
+	}
+	return result
+}
+
 type ProductListItemResponse struct {
 	VariantID   int64                  `json:"variant_id"`
 	ProductID   int64                  `json:"product_id"`
 	CategoryID  int64                  `json:"category_id"`
 	Name        string                 `json:"name"`
 	Description string                 `json:"description"`
-	ImageURL    string                 `json:"image_url"`
 	Price       float64                `json:"price"`
 	Attributes  map[string]interface{} `json:"attributes"`
+	Images      []*ImageResponse       `json:"images"`
 }
 
-func ProductListItemToResponse(p *model.ProductListItem) *ProductListItemResponse {
+func ProductListItemWithImagesToResponse(item *model.ProductListItemWithImages) *ProductListItemResponse {
 	return &ProductListItemResponse{
-		VariantID:   p.VariantID,
-		ProductID:   p.ProductID,
-		CategoryID:  p.CategoryID,
-		Name:        p.Name,
-		Description: p.Description,
-		ImageURL:    p.ImageURL,
-		Price:       p.Price,
-		Attributes:  p.Attributes,
+		VariantID:   item.Item.VariantID,
+		ProductID:   item.Item.ProductID,
+		CategoryID:  item.Item.CategoryID,
+		Name:        item.Item.Name,
+		Description: item.Item.Description,
+		Price:       item.Item.Price,
+		Attributes:  item.Item.Attributes,
+		Images:      imagesToResponse(item.Images),
 	}
 }
 
@@ -35,7 +48,7 @@ type VariantResponse struct {
 	Price      float64                `json:"price"`
 	Stock      int                    `json:"stock"`
 	Attributes map[string]interface{} `json:"attributes"`
-	ImageURL   *string                `json:"image_url"`
+	Images     []*ImageResponse       `json:"images"`
 }
 
 type ProductDetailResponse struct {
@@ -43,7 +56,6 @@ type ProductDetailResponse struct {
 	CategoryID  int64              `json:"category_id"`
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
-	ImageURL    string             `json:"image_url"`
 	Variants    []*VariantResponse `json:"variants"`
 }
 
@@ -51,12 +63,12 @@ func ProductDetailToResponse(p *service.ProductWithVariants) *ProductDetailRespo
 	variants := make([]*VariantResponse, 0, len(p.Variants))
 	for _, v := range p.Variants {
 		variants = append(variants, &VariantResponse{
-			ID:         v.ID,
-			SKU:        v.SKU,
-			Price:      v.Price,
-			Stock:      v.Stock,
-			Attributes: v.Attributes,
-			ImageURL:   v.ImageURL,
+			ID:         v.Variant.ID,
+			SKU:        v.Variant.SKU,
+			Price:      v.Variant.Price,
+			Stock:      v.Variant.Stock,
+			Attributes: v.Variant.Attributes,
+			Images:     imagesToResponse(v.Images),
 		})
 	}
 
@@ -65,7 +77,6 @@ func ProductDetailToResponse(p *service.ProductWithVariants) *ProductDetailRespo
 		CategoryID:  p.Product.CategoryID,
 		Name:        p.Product.Name,
 		Description: p.Product.Description,
-		ImageURL:    p.Product.ImageURL,
 		Variants:    variants,
 	}
 }
@@ -98,10 +109,10 @@ type PaginatedProductsResponse struct {
 	TotalPages int                        `json:"total_pages"`
 }
 
-func PaginatedProductsToResponse(p *model.PaginatedProducts) *PaginatedProductsResponse {
+func PaginatedProductsToResponse(p *model.PaginatedProductsWithImages) *PaginatedProductsResponse {
 	items := make([]*ProductListItemResponse, 0, len(p.Items))
 	for _, item := range p.Items {
-		items = append(items, ProductListItemToResponse(item))
+		items = append(items, ProductListItemWithImagesToResponse(item))
 	}
 
 	totalPages := 0

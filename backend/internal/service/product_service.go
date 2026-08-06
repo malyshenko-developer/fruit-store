@@ -36,7 +36,7 @@ var AllowedAttributeFilters = map[string]bool{
 
 type ProductWithVariants struct {
 	Product  *model.Product
-	Variants []*model.ProductVariant
+	Variants []*model.ProductVariantWithImages
 }
 
 type ProductRepository interface {
@@ -45,14 +45,15 @@ type ProductRepository interface {
 	GetVariantsByProductID(ctx context.Context, productID int64) ([]*model.ProductVariant, error)
 	GetVariantByID(ctx context.Context, id int64) (*model.ProductVariant, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
+	GetImagesByVariantIDs(ctx context.Context, variantIDs []int64) (map[int64][]*model.VariantImage, error)
 	Search(ctx context.Context, query string, limit int) ([]*model.ProductListItem, int, error)
 }
 
 type ProductService interface {
-	GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error)
+	GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProductsWithImages, error)
 	GetByID(ctx context.Context, id int64) (*ProductWithVariants, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
-	Search(ctx context.Context, query string) (*model.PaginatedProducts, error)
+	Search(ctx context.Context, query string) (*model.PaginatedProductsWithImages, error)
 }
 
 type productService struct {
@@ -63,9 +64,15 @@ func NewProductService(repo ProductRepository) ProductService {
 	return &productService{repo: repo}
 }
 
-func (s *productService) GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProducts, error) {
+func (s *productService) GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProductsWithImages, error) {
 	normalizeListParams(&params)
-	return s.repo.GetAll(ctx, params)
+
+	result, err := s.repo.GetAll(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.attachImages(ctx, result)
 }
 
 func (s *productService) GetByID(ctx context.Context, id int64) (*ProductWithVariants, error) {
@@ -79,25 +86,43 @@ func (s *productService) GetByID(ctx context.Context, id int64) (*ProductWithVar
 		return nil, err
 	}
 
-	return &ProductWithVariants{Product: product, Variants: variants}, nil
+	variantIDs := make([]int64, len(variants))
+	for i, v := range variants {
+		variantIDs[i] = v.ID
+	}
+
+	imagesByVariant, err := s.repo.GetImagesByVariantIDs(ctx, variantIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	variantsWithImages := make([]*model.ProductVariantWithImages, len(variants))
+	for i, v := range variants {
+		variantsWithImages[i] = &model.ProductVariantWithImages{
+			Variant: v,
+			Images:  imagesByVariant[v.ID],
+		}
+	}
+
+	return &ProductWithVariants{Product: product, Variants: variantsWithImages}, nil
 }
 
 func (s *productService) GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error) {
 	return s.repo.GetAvailableFilters(ctx, categoryID)
 }
 
-func (s *productService) Search(ctx context.Context, query string) (*model.PaginatedProducts, error) {
+func (s *productService) Search(ctx context.Context, query string) (*model.PaginatedProductsWithImages, error) {
 	items, total, err := s.repo.Search(ctx, query, searchResultLimit)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.PaginatedProducts{
+	return s.attachImages(ctx, &model.PaginatedProducts{
 		Items: items,
 		Total: total,
 		Page:  1,
 		Limit: searchResultLimit,
-	}, nil
+	})
 }
 
 func normalizeListParams(p *model.ListProductsParams) {
@@ -116,4 +141,31 @@ func normalizeListParams(p *model.ListProductsParams) {
 	if p.Limit > maxLimit {
 		p.Limit = maxLimit
 	}
+}
+
+func (s *productService) attachImages(ctx context.Context, result *model.PaginatedProducts) (*model.PaginatedProductsWithImages, error) {
+	variantIDs := make([]int64, len(result.Items))
+	for i, item := range result.Items {
+		variantIDs[i] = item.VariantID
+	}
+
+	imagesByVariant, err := s.repo.GetImagesByVariantIDs(ctx, variantIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*model.ProductListItemWithImages, len(result.Items))
+	for i, item := range result.Items {
+		items[i] = &model.ProductListItemWithImages{
+			Item:   item,
+			Images: imagesByVariant[item.VariantID],
+		}
+	}
+
+	return &model.PaginatedProductsWithImages{
+		Items: items,
+		Total: result.Total,
+		Page:  result.Page,
+		Limit: result.Limit,
+	}, nil
 }
