@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ThemeToggle } from "@/features/theme-toggle";
 import { AuthStatus } from "@/features/auth-modal";
 import { SearchInput } from "@/features/search-products";
 
@@ -64,6 +65,7 @@ export function Header() {
         </Link>
         <SearchInput />
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <AuthStatus />
           <Link href="/cart" className="text-sm flex items-center">
             Cart
