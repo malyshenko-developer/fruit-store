@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 
 import { useSearchProducts } from "@/entities/product";
 
+import { Input } from "@/shared/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 
 export function SearchInput() {
@@ -35,13 +36,13 @@ export function SearchInput() {
         size={20}
         className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
       />
-      <input
+      <Input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setIsFocused(true)}
         placeholder="Поиск iPhone, Mac, Watch..."
-        className="w-full bg-surface border border-border text-foreground py-2.5 pr-3.5 pl-10 rounded-full text-sm outline-none"
+        className="pl-10"
       />
 
       {showResults && (
