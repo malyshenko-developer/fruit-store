@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 export function Footer() {
-    return (
-        <footer className="border-t p-8 mt-auto">
-            <div className="max-w-4xl mx-auto flex justify-between items-center text-sm text-gray-500">
-                <p>© 2026 Fruit Store. Независимый магазин техники Apple.</p>
-                <Link href="/track-order" className="hover:underline">
-                    Отследить заказ по номеру
-                </Link>
-            </div>
-        </footer>
-    );
+  return (
+    <footer className="border-t py-7 px-6 flex flex-col items-center gap-2.5 mt-auto border-border">
+      <p className="text-sm text-muted-foreground">
+        © 2026 Fruit Store. Независимый магазин техники Apple.
+      </p>
+      <Link href="/track-order" className="text-sm text-primary">
+        Отследить заказ по номеру
+      </Link>
+    </footer>
+  );
 }
