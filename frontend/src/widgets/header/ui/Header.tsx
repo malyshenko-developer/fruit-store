@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { ShoppingCart } from "lucide-react";
 
 import { ThemeToggle } from "@/features/theme-toggle";
 import { AuthStatus } from "@/features/auth-modal";
 import { SearchInput } from "@/features/search-products";
 
 import { CartCounter } from "@/entities/cart";
+
+import { Button } from "@/shared/ui/button";
 
 export function Header() {
   return (
@@ -67,10 +70,10 @@ export function Header() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <AuthStatus />
-          <Link href="/cart" className="text-sm flex items-center">
-            Cart
+          <Button variant="outline" size="icon" render={<Link href="/cart" />} className="relative">
+            <ShoppingCart className="size-[20px]" />
             <CartCounter />
-          </Link>
+          </Button>
         </div>
       </div>
     </header>
