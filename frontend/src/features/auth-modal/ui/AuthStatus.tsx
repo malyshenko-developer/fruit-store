@@ -6,6 +6,8 @@ import { LogIn, User } from "lucide-react";
 
 import { useMe } from "@/entities/auth";
 
+import { Button } from "@/shared/ui/button";
+
 import { AuthModal } from "./AuthModal";
 
 export function AuthStatus() {
@@ -18,23 +20,17 @@ export function AuthStatus() {
 
   if (me && !isError) {
     return (
-      <Link
-        href="/profile"
-        className="size-10 rounded-full flex items-center justify-center bg-accent border border-accent"
-      >
-        <User size={26} strokeWidth={2} />
-      </Link>
+      <Button variant="default" size="icon" render={<Link href="/profile" />}>
+        <User className="size-[22px]" strokeWidth={2} />
+      </Button>
     );
   }
 
   return (
     <>
-      <button
-        onClick={() => setModalOpen(true)}
-        className="size-10 rounded-full flex items-center justify-center border border-border"
-      >
-        <LogIn size={22} />
-      </button>
+      <Button variant="outline" size="icon" onClick={() => setModalOpen(true)}>
+        <LogIn className="size-[20px]" />
+      </Button>
       {isModalOpen && <AuthModal onClose={() => setModalOpen(false)} />}
     </>
   );
