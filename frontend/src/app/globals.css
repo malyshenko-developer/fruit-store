@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
     --background: oklch(0.145 0.004 260);
@@ -6,7 +10,28 @@
     --surface: oklch(0.195 0.006 260);
     --border: oklch(0.25 0.006 260);
     --muted-foreground: oklch(0.68 0.01 260);
-    --accent: oklch(0.68 0.16 255);
+
+    --card: oklch(0.195 0.006 260);
+    --card-foreground: oklch(0.97 0.002 260);
+    --popover: oklch(0.195 0.006 260);
+    --popover-foreground: oklch(0.97 0.002 260);
+
+    --primary: oklch(0.68 0.16 255);
+    --primary-foreground: oklch(0.145 0.004 260);
+
+    --secondary: oklch(0.195 0.006 260);
+    --secondary-foreground: oklch(0.97 0.002 260);
+
+    --muted: oklch(0.195 0.006 260);
+
+    --accent: oklch(0.25 0.006 260);
+    --accent-foreground: oklch(0.97 0.002 260);
+
+    --destructive: oklch(0.577 0.245 27.325);
+    --input: oklch(0.25 0.006 260);
+    --ring: oklch(0.68 0.16 255);
+
+    --radius: 0.625rem;
 }
 
 @theme inline {
@@ -15,15 +40,41 @@
     --color-surface: var(--surface);
     --color-border: var(--border);
     --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
     --font-sans: var(--font-sans);
-}
 
-body {
-    background: var(--background);
-    color: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
 }
 
 button {
     cursor: pointer;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+    html {
+        @apply font-sans;
+    }
 }
