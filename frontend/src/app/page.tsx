@@ -1,12 +1,12 @@
 import { getCategories, CategoryList } from "@/entities/category";
+import { Hero } from "./Hero";
 
 export default async function Home() {
-    const categories = await getCategories();
+  const categories = await getCategories();
 
-    return (
-        <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">Shop by Category</h1>
-            <CategoryList categories={categories} />
-        </div>
-    );
+  return (
+    <>
+      <Hero />
+    </>
+  );
 }
