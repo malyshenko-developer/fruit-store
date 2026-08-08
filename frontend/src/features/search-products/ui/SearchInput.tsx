@@ -2,13 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Search } from "lucide-react";
 
 import { useSearchProducts } from "@/entities/product";
 
 import { Input } from "@/shared/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
-import { entries } from "eslint-config-next";
 
 export function SearchInput() {
   const [query, setQuery] = useState("");
@@ -98,13 +98,14 @@ export function SearchInput() {
                           className="flex items-center gap-3 p-2 rounded-[14px] hover:bg-white/5 transition-colors"
                           onClick={() => setIsFocused(false)}
                         >
-                          <div className="w-12 h-12 shrink-0 rounded-[10px] overflow-hidden bg-background">
+                          <div className="w-12 h-12 shrink-0 rounded-[10px] overflow-hidden bg-background relative">
                             {mainImage && (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={mainImage}
                                 alt={item.name}
-                                className="w-full h-full object-cover"
+                                fill
+                                sizes="48px"
+                                className="object-cover"
                               />
                             )}
                           </div>
