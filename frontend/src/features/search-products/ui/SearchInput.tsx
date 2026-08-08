@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
 
-import { useSearchProducts } from "@/entities/product";
+import { getVariantLabel, useSearchProducts } from "@/entities/product";
 
 import { Input } from "@/shared/ui/input";
 import { Skeleton } from "@/shared/ui/skeleton";
@@ -119,7 +119,9 @@ export function SearchInput() {
                           </div>
 
                           <div className="flex-1">
-                            <p className="text-sm font-semibold truncate">{item.name}</p>
+                            <p className="text-sm font-semibold truncate">
+                              {getVariantLabel(item, item.category_slug)}
+                            </p>
                             <p className="text-[13px] text-muted-foreground">{item.price}</p>
                           </div>
                         </Link>
