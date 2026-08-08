@@ -108,3 +108,13 @@ button {
         @apply font-sans;
     }
 }
+
+@layer utilities {
+    .scrollbar-hide {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE, Edge */
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, новый Edge */
+    }
+}

@@ -71,7 +71,7 @@ export function SearchInput() {
       />
 
       {showResults && (
-        <div className="absolute top-full left-0 mt-2 max-w-[420px] w-full max-h-[420px] overflow-y-auto bg-surface border border-border rounded-[20px] shadow-lg p-2.5 z-60">
+        <div className="absolute top-full left-0 mt-2 max-w-[420px] w-full max-h-[420px] overflow-y-auto scrollbar-hide bg-surface border border-border rounded-[20px] shadow-lg p-2.5 z-60">
           {isLoading && (
             <p className="text-sm text-muted-foreground text-center py-4 px-3">Ищем...</p>
           )}
@@ -95,7 +95,7 @@ export function SearchInput() {
                         <Link
                           key={item.variant_id}
                           href={`/products/${item.product_id}`}
-                          className="flex items-center gap-3 p-2 rounded-[14px] hover:bg-white/5 transition-colors"
+                          className="flex items-center gap-3 py-2 px-[18px] -mx-2.5 hover:bg-white/5 transition-colors"
                           onClick={() => setIsFocused(false)}
                         >
                           <div className="w-12 h-12 shrink-0 rounded-[10px] overflow-hidden bg-background relative">
