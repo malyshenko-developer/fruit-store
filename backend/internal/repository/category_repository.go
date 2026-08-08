@@ -19,7 +19,14 @@ func NewCategoryRepository(pool *pgxpool.Pool) *CategoryRepository {
 }
 
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]*model.Category, error) {
-	const q = `SELECT id, name, slug FROM categories ORDER BY id`
+	const q = `
+		SELECT c.id, c.name, c.slug, c.image_url, COALESCE(MIN(pv.price), 0)
+		FROM categories c
+		LEFT JOIN products p ON p.category_id = c.id
+		LEFT JOIN product_variants pv ON pv.product_id = p.id
+		GROUP BY c.id, c.name, c.slug, c.image_url
+		ORDER BY c.id`
+
 	rows, err := r.pool.Query(ctx, q)
 	if err != nil {
 		return nil, err
@@ -29,7 +36,7 @@ func (r *CategoryRepository) GetAll(ctx context.Context) ([]*model.Category, err
 	var categories []*model.Category
 	for rows.Next() {
 		var c model.Category
-		if err := rows.Scan(&c.ID, &c.Name, &c.Slug); err != nil {
+		if err := rows.Scan(&c.ID, &c.Name, &c.Slug, &c.ImageURL, &c.MinPrice); err != nil {
 			return nil, err
 		}
 		categories = append(categories, &c)
@@ -39,10 +46,10 @@ func (r *CategoryRepository) GetAll(ctx context.Context) ([]*model.Category, err
 }
 
 func (r *CategoryRepository) GetBySlug(ctx context.Context, slug string) (*model.Category, error) {
-	const q = `SELECT id, name, slug FROM categories WHERE slug = $1`
+	const q = `SELECT id, name, slug, image_url FROM categories WHERE slug = $1`
 
 	var c model.Category
-	err := r.pool.QueryRow(ctx, q, slug).Scan(&c.ID, &c.Name, &c.Slug)
+	err := r.pool.QueryRow(ctx, q, slug).Scan(&c.ID, &c.Name, &c.Slug, &c.ImageURL)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperr.ErrNotFound
