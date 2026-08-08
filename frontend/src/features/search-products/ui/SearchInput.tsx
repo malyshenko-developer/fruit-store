@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 
@@ -8,14 +8,17 @@ import { useSearchProducts } from "@/entities/product";
 
 import { Input } from "@/shared/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { entries } from "eslint-config-next";
 
 export function SearchInput() {
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const debouncedQuery = useDebouncedValue(query, 400);
   const containerRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading } = useSearchProducts(debouncedQuery);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSearchProducts(debouncedQuery);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -29,6 +32,28 @@ export function SearchInput() {
   }, []);
 
   const showResults = isFocused && debouncedQuery.trim().length > 0;
+
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage],
+  );
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(handleObserver, { threshold: 0.1 });
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, [handleObserver, showResults]);
+
+  const items = data?.pages.flatMap((page) => page.items) ?? [];
+  const total = data?.pages[0]?.total ?? 0;
 
   return (
     <div ref={containerRef} className="relative flex-1 max-w-[380px]">
@@ -46,24 +71,24 @@ export function SearchInput() {
       />
 
       {showResults && (
-        <div className="absolute top-full left-0 mt-2 max-w-[420px] w-full bg-surface border border-border rounded-[20px] shadow-lg p-2.5 z-60 overflow-y-auto">
+        <div className="absolute top-full left-0 mt-2 max-w-[420px] w-full max-h-[420px] overflow-y-auto bg-surface border border-border rounded-[20px] shadow-lg p-2.5 z-60">
           {isLoading && (
             <p className="text-sm text-muted-foreground text-center py-4 px-3">Ищем...</p>
           )}
 
           {!isLoading && data && (
             <>
-              {data.items.length === 0 ? (
+              {items.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 px-3 text-center">
                   Ничего не найдено.
                 </p>
               ) : (
                 <>
                   <p className="text-xs font-semibold uppercase tracking-[0.04em] text-muted-foreground mt-1 mx-2.5 mb-1.5">
-                    Товары ({data.total})
+                    Товары ({total})
                   </p>
                   <div className="flex flex-col gap-0.5">
-                    {data.items.map((item) => {
+                    {items.map((item) => {
                       const mainImage = item.images?.[0]?.url;
 
                       return (
@@ -92,6 +117,13 @@ export function SearchInput() {
                       );
                     })}
                   </div>
+                  {hasNextPage && (
+                    <div ref={loadMoreRef} className="py-2 text-center">
+                      {isFetchingNextPage && (
+                        <p className="text-xs text-muted-foreground">Загрузка...</p>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </>

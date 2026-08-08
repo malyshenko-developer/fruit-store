@@ -126,7 +126,7 @@ func (s *productService) Search(ctx context.Context, query string, page int) (*m
 	return s.attachImages(ctx, &model.PaginatedProducts{
 		Items: items,
 		Total: total,
-		Page:  1,
+		Page:  page,
 		Limit: searchResultLimit,
 	})
 }
