@@ -20,7 +20,7 @@ export function AuthStatus() {
 
   if (me && !isError) {
     return (
-      <Button variant="default" size="icon" render={<Link href="/profile" />}>
+      <Button variant="default" size="icon" render={<Link href="/profile" />} nativeButton={false}>
         <User className="size-[22px]" strokeWidth={2} />
       </Button>
     );

@@ -70,7 +70,13 @@ export function Header() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <AuthStatus />
-          <Button variant="outline" size="icon" render={<Link href="/cart" />} className="relative">
+          <Button
+            variant="outline"
+            size="icon"
+            render={<Link href="/cart" />}
+            nativeButton={false}
+            className="relative"
+          >
             <ShoppingCart className="size-[20px]" />
             <CartCounter />
           </Button>
