@@ -8,7 +8,10 @@ import { Search } from "lucide-react";
 import { useSearchProducts } from "@/entities/product";
 
 import { Input } from "@/shared/ui/input";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+
+import { SearchResultSkeleton } from "./SearchResultSkeleton";
 
 export function SearchInput() {
   const [query, setQuery] = useState("");
@@ -73,7 +76,12 @@ export function SearchInput() {
       {showResults && (
         <div className="absolute top-full left-0 mt-2 max-w-[420px] w-full max-h-[420px] overflow-y-auto scrollbar-hide bg-surface border border-border rounded-[20px] shadow-lg p-2.5 z-60">
           {isLoading && (
-            <p className="text-sm text-muted-foreground text-center py-4 px-3">Ищем...</p>
+            <div className="flex flex-col gap-0.5">
+              <Skeleton className="h-3 w-24 mt-1 mx-2.5 mb-1.5" />
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SearchResultSkeleton key={i} />
+              ))}
+            </div>
           )}
 
           {!isLoading && data && (
@@ -119,11 +127,7 @@ export function SearchInput() {
                     })}
                   </div>
                   {hasNextPage && (
-                    <div ref={loadMoreRef} className="py-2 text-center">
-                      {isFetchingNextPage && (
-                        <p className="text-xs text-muted-foreground">Загрузка...</p>
-                      )}
-                    </div>
+                    <div ref={loadMoreRef}>{isFetchingNextPage && <SearchResultSkeleton />}</div>
                   )}
                 </>
               )}
