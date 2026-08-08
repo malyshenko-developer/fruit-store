@@ -81,12 +81,14 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 			pv.id,
 			p.id,
 			p.category_id,
+			c.slug,
 			p.name,
 			p.description,
 			pv.price,
 			pv.attributes
 		FROM product_variants pv
 		JOIN products p ON p.id = pv.product_id
+		JOIN categories c ON c.id = p.category_id
 		WHERE %s
 		ORDER BY %s %s
 		LIMIT $%d OFFSET $%d`, whereClause, orderColumn, orderDirection, limitPlaceholder, offsetPlaceholder)
@@ -102,7 +104,7 @@ func (r *ProductRepository) GetAll(ctx context.Context, params model.ListProduct
 		var item model.ProductListItem
 		var rawAttributes []byte
 
-		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.Price, &rawAttributes); err != nil {
+		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.CategorySlug, &item.Name, &item.Description, &item.Price, &rawAttributes); err != nil {
 			return nil, err
 		}
 
@@ -285,10 +287,11 @@ func (r *ProductRepository) Search(ctx context.Context, query string, limit, off
 
 	const q = `
 		SELECT
-			pv.id, p.id, p.category_id, p.name, p.description,
+			pv.id, p.id, p.category_id, c.slug, p.name, p.description,
 			pv.price, pv.attributes
 		FROM product_variants pv
 		JOIN products p ON p.id = pv.product_id
+		JOIN categories c ON c.id = p.category_id
 		WHERE p.name ILIKE '%' || $1 || '%'
 		ORDER BY p.name
 		LIMIT $2 OFFSET $3`
@@ -304,7 +307,7 @@ func (r *ProductRepository) Search(ctx context.Context, query string, limit, off
 		var item model.ProductListItem
 		var rawAttributes []byte
 
-		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.Name, &item.Description, &item.Price, &rawAttributes); err != nil {
+		if err := rows.Scan(&item.VariantID, &item.ProductID, &item.CategoryID, &item.CategorySlug, &item.Name, &item.Description, &item.Price, &rawAttributes); err != nil {
 			return nil, 0, err
 		}
 

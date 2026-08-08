@@ -8,13 +8,14 @@ type Product struct {
 }
 
 type ProductListItem struct {
-	VariantID   int64
-	ProductID   int64
-	CategoryID  int64
-	Name        string
-	Description string
-	Price       float64
-	Attributes  map[string]interface{}
+	VariantID    int64
+	ProductID    int64
+	CategoryID   int64
+	CategorySlug string
+	Name         string
+	Description  string
+	Price        float64
+	Attributes   map[string]interface{}
 }
 
 type ListProductsParams struct {

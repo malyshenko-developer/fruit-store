@@ -19,26 +19,28 @@ func imagesToResponse(images []*model.VariantImage) []*ImageResponse {
 }
 
 type ProductListItemResponse struct {
-	VariantID   int64                  `json:"variant_id"`
-	ProductID   int64                  `json:"product_id"`
-	CategoryID  int64                  `json:"category_id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Price       float64                `json:"price"`
-	Attributes  map[string]interface{} `json:"attributes"`
-	Images      []*ImageResponse       `json:"images"`
+	VariantID    int64                  `json:"variant_id"`
+	ProductID    int64                  `json:"product_id"`
+	CategoryID   int64                  `json:"category_id"`
+	CategorySlug string                 `json:"category_slug"`
+	Name         string                 `json:"name"`
+	Description  string                 `json:"description"`
+	Price        float64                `json:"price"`
+	Attributes   map[string]interface{} `json:"attributes"`
+	Images       []*ImageResponse       `json:"images"`
 }
 
 func ProductListItemWithImagesToResponse(item *model.ProductListItemWithImages) *ProductListItemResponse {
 	return &ProductListItemResponse{
-		VariantID:   item.Item.VariantID,
-		ProductID:   item.Item.ProductID,
-		CategoryID:  item.Item.CategoryID,
-		Name:        item.Item.Name,
-		Description: item.Item.Description,
-		Price:       item.Item.Price,
-		Attributes:  item.Item.Attributes,
-		Images:      imagesToResponse(item.Images),
+		VariantID:    item.Item.VariantID,
+		ProductID:    item.Item.ProductID,
+		CategoryID:   item.Item.CategoryID,
+		CategorySlug: item.Item.CategorySlug,
+		Name:         item.Item.Name,
+		Description:  item.Item.Description,
+		Price:        item.Item.Price,
+		Attributes:   item.Item.Attributes,
+		Images:       imagesToResponse(item.Images),
 	}
 }
 
