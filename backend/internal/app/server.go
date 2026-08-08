@@ -93,6 +93,7 @@ func (s *Server) setupRouter() {
 	{
 		categories := v1.Group("/categories")
 		categories.GET("", categoryHandlers.List)
+		categories.GET("/:slug", categoryHandlers.GetBySlug)
 
 		products := v1.Group("/products")
 		products.GET("", productHandlers.List)

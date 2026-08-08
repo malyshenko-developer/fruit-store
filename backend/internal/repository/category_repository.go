@@ -2,8 +2,11 @@ package repository
 
 import (
 	"context"
+	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/malyshenko-developer/fruit-store/internal/apperr"
 	"github.com/malyshenko-developer/fruit-store/internal/model"
 )
 
@@ -33,4 +36,19 @@ func (r *CategoryRepository) GetAll(ctx context.Context) ([]*model.Category, err
 	}
 
 	return categories, rows.Err()
+}
+
+func (r *CategoryRepository) GetBySlug(ctx context.Context, slug string) (*model.Category, error) {
+	const q = `SELECT id, name, slug FROM categories WHERE slug = $1`
+
+	var c model.Category
+	err := r.pool.QueryRow(ctx, q, slug).Scan(&c.ID, &c.Name, &c.Slug)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperr.ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &c, nil
 }

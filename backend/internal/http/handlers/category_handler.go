@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
+	"github.com/malyshenko-developer/fruit-store/internal/apperr"
 	"github.com/malyshenko-developer/fruit-store/internal/http/dto"
 	"github.com/malyshenko-developer/fruit-store/internal/service"
 )
@@ -31,4 +33,21 @@ func (h *CategoryHandler) List(c *gin.Context) {
 	}
 
 	writeOK(c, response)
+}
+
+func (h *CategoryHandler) GetBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+
+	category, err := h.service.GetBySlug(c.Request.Context(), slug)
+	if err != nil {
+		if errors.Is(err, apperr.ErrNotFound) {
+			writeNotFound(c, "category not found")
+			return
+		}
+		h.logger.Error("failed to fetch category", "error", err, "slug", slug)
+		writeInternalError(c, "failed to fetch category")
+		return
+	}
+
+	writeOK(c, dto.CategoryToResponse(category))
 }

@@ -8,10 +8,12 @@ import (
 
 type CategoryRepository interface {
 	GetAll(ctx context.Context) ([]*model.Category, error)
+	GetBySlug(ctx context.Context, slug string) (*model.Category, error)
 }
 
 type CategoryService interface {
 	GetAll(ctx context.Context) ([]*model.Category, error)
+	GetBySlug(ctx context.Context, slug string) (*model.Category, error)
 }
 
 type categoryService struct {
@@ -24,4 +26,8 @@ func NewCategoryService(repo CategoryRepository) CategoryService {
 
 func (s *categoryService) GetAll(ctx context.Context) ([]*model.Category, error) {
 	return s.repo.GetAll(ctx)
+}
+
+func (s *categoryService) GetBySlug(ctx context.Context, slug string) (*model.Category, error) {
+	return s.repo.GetBySlug(ctx, slug)
 }
