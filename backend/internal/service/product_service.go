@@ -46,14 +46,14 @@ type ProductRepository interface {
 	GetVariantByID(ctx context.Context, id int64) (*model.ProductVariant, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
 	GetImagesByVariantIDs(ctx context.Context, variantIDs []int64) (map[int64][]*model.VariantImage, error)
-	Search(ctx context.Context, query string, limit int) ([]*model.ProductListItem, int, error)
+	Search(ctx context.Context, query string, limit, offset int) ([]*model.ProductListItem, int, error)
 }
 
 type ProductService interface {
 	GetAll(ctx context.Context, params model.ListProductsParams) (*model.PaginatedProductsWithImages, error)
 	GetByID(ctx context.Context, id int64) (*ProductWithVariants, error)
 	GetAvailableFilters(ctx context.Context, categoryID *int64) (*model.ProductFilters, error)
-	Search(ctx context.Context, query string) (*model.PaginatedProductsWithImages, error)
+	Search(ctx context.Context, query string, page int) (*model.PaginatedProductsWithImages, error)
 }
 
 type productService struct {
@@ -111,8 +111,14 @@ func (s *productService) GetAvailableFilters(ctx context.Context, categoryID *in
 	return s.repo.GetAvailableFilters(ctx, categoryID)
 }
 
-func (s *productService) Search(ctx context.Context, query string) (*model.PaginatedProductsWithImages, error) {
-	items, total, err := s.repo.Search(ctx, query, searchResultLimit)
+func (s *productService) Search(ctx context.Context, query string, page int) (*model.PaginatedProductsWithImages, error) {
+	if page < 1 {
+		page = 1
+	}
+
+	offset := (page - 1) * searchResultLimit
+
+	items, total, err := s.repo.Search(ctx, query, searchResultLimit, offset)
 	if err != nil {
 		return nil, err
 	}

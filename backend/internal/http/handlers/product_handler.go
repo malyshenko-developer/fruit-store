@@ -149,7 +149,17 @@ func (h *ProductHandler) Search(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.Search(c.Request.Context(), query)
+	page := 1
+	if pageStr := c.Query("page"); pageStr != "" {
+		parsed, err := strconv.Atoi(pageStr)
+		if err != nil {
+			writeBadRequest(c, "page must be a number")
+			return
+		}
+		page = parsed
+	}
+
+	result, err := h.service.Search(c.Request.Context(), query, page)
 	if err != nil {
 		h.logger.Error("failed to search products", "error", err, "query", query)
 		writeInternalError(c, "failed to search products")

@@ -271,7 +271,7 @@ func (r *ProductRepository) GetImagesByVariantIDs(ctx context.Context, variantID
 	return imagesByVariant, rows.Err()
 }
 
-func (r *ProductRepository) Search(ctx context.Context, query string, limit int) ([]*model.ProductListItem, int, error) {
+func (r *ProductRepository) Search(ctx context.Context, query string, limit, offset int) ([]*model.ProductListItem, int, error) {
 	const countQuery = `
 		SELECT COUNT(*)
 		FROM product_variants pv
@@ -291,9 +291,9 @@ func (r *ProductRepository) Search(ctx context.Context, query string, limit int)
 		JOIN products p ON p.id = pv.product_id
 		WHERE p.name ILIKE '%' || $1 || '%'
 		ORDER BY p.name
-		LIMIT $2`
+		LIMIT $2 OFFSET $3`
 
-	rows, err := r.pool.Query(ctx, q, query, limit)
+	rows, err := r.pool.Query(ctx, q, query, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
