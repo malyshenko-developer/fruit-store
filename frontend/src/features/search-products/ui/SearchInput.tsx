@@ -118,7 +118,7 @@ export function SearchInput() {
                             )}
                           </div>
 
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold truncate">
                               {getVariantLabel(item, item.category_slug)}
                             </p>
