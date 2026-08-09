@@ -6,6 +6,7 @@ type CategoryResponse struct {
 	ID       int64   `json:"id"`
 	Name     string  `json:"name"`
 	Slug     string  `json:"slug"`
+	ImageURL *string `json:"image_url"`
 	MinPrice float64 `json:"min_price"`
 }
 
@@ -14,6 +15,7 @@ func CategoryToResponse(c *model.Category) *CategoryResponse {
 		ID:       c.ID,
 		Name:     c.Name,
 		Slug:     c.Slug,
+		ImageURL: c.ImageURL,
 		MinPrice: c.MinPrice,
 	}
 }
