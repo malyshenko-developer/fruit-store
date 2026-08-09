@@ -1,5 +1,7 @@
-import { getCategories, CategoryList } from "@/entities/category";
+import { getCategories } from "@/entities/category";
+
 import { Hero } from "./Hero";
+import { CategoryList } from "./CategoryList";
 
 export default async function Home() {
   const categories = await getCategories();
@@ -7,6 +9,7 @@ export default async function Home() {
   return (
     <>
       <Hero />
+      <CategoryList categories={categories} />
     </>
   );
 }
