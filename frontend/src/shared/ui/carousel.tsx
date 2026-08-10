@@ -29,6 +29,7 @@ type CarouselContextProps = {
 } & CarouselProps;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
+const EMPTY_SNAPS: number[] = [];
 
 function useCarousel() {
   const context = React.useContext(CarouselContext);
@@ -239,8 +240,8 @@ function useEmblaDotsState(api: CarouselApi) {
 
   const scrollSnaps = React.useSyncExternalStore(
     subscribe,
-    () => api?.scrollSnapList() ?? [],
-    () => [],
+    () => api?.scrollSnapList() ?? EMPTY_SNAPS,
+    () => EMPTY_SNAPS,
   );
   const selectedIndex = React.useSyncExternalStore(
     subscribe,
