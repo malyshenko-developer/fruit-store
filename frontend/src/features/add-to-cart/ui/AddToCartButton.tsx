@@ -2,24 +2,37 @@
 
 import { useAddToCart } from "@/entities/cart";
 
+import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
+
 interface Props {
-    variantId: number;
+  variantId: number;
+  price?: number;
+  className?: string;
 }
 
-export function AddToCartButton({ variantId }: Props) {
-    const { mutate, isPending, isSuccess } = useAddToCart();
+export function AddToCartButton({ variantId, price, className }: Props) {
+  const { mutate, isPending, isSuccess } = useAddToCart();
 
-    const handleClick = () => {
-        mutate({ variantId, quantity: 1 });
-    }
+  const handleClick = () => {
+    mutate({ variantId, quantity: 1 });
+  };
 
-    return (
-        <button
-            onClick={handleClick}
-            disabled={isPending}
-            className="border rounded px-4 py-2 text-sm disabled:opacity-50"
-        >
-            {isPending ? "Adding..." : isSuccess ? "Added!" : "Add to Cart"}
-        </button>
-    );
+  const label = isPending
+    ? "Добавляем..."
+    : isSuccess
+      ? "Добавлено!"
+      : price
+        ? `Добавить в корзину — $${price.toLocaleString("en-US")}`
+        : "Добавить в корзину";
+
+  return (
+    <Button
+      onClick={handleClick}
+      disabled={isPending}
+      className={cn("w-full rounded-full font-semibold", className)}
+    >
+      {label}
+    </Button>
+  );
 }
