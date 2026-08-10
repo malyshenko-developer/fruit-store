@@ -40,6 +40,36 @@ function useCarousel() {
   return context;
 }
 
+function useEmblaScrollState(api: CarouselApi) {
+  const subscribe = React.useCallback(
+    (callback: () => void) => {
+      if (!api) return () => {};
+      api.on("init", callback);
+      api.on("reInit", callback);
+      api.on("select", callback);
+      return () => {
+        api.off("init", callback);
+        api.off("reInit", callback);
+        api.off("select", callback);
+      };
+    },
+    [api],
+  );
+
+  const canScrollPrev = React.useSyncExternalStore(
+    subscribe,
+    () => api?.canScrollPrev() ?? false,
+    () => false,
+  );
+  const canScrollNext = React.useSyncExternalStore(
+    subscribe,
+    () => api?.canScrollNext() ?? false,
+    () => false,
+  );
+
+  return { canScrollPrev, canScrollNext };
+}
+
 function Carousel({
   orientation = "horizontal",
   opts,
@@ -56,14 +86,8 @@ function Carousel({
     },
     plugins,
   );
-  const [canScrollPrev, setCanScrollPrev] = React.useState(() => api?.canScrollPrev() ?? false);
-  const [canScrollNext, setCanScrollNext] = React.useState(() => api?.canScrollNext() ?? false);
 
-  const onSelect = React.useCallback((api: CarouselApi) => {
-    if (!api) return;
-    setCanScrollPrev(api.canScrollPrev());
-    setCanScrollNext(api.canScrollNext());
-  }, []);
+  const { canScrollPrev, canScrollNext } = useEmblaScrollState(api);
 
   const scrollPrev = React.useCallback(() => {
     api?.scrollPrev();
@@ -90,16 +114,6 @@ function Carousel({
     if (!api || !setApi) return;
     setApi(api);
   }, [api, setApi]);
-
-  React.useEffect(() => {
-    if (!api) return;
-    api.on("reInit", onSelect);
-    api.on("select", onSelect);
-
-    return () => {
-      api?.off("select", onSelect);
-    };
-  }, [api, onSelect]);
 
   return (
     <CarouselContext.Provider
@@ -132,7 +146,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
+    <div ref={carouselRef} className="overflow-hidden py-3 -my-3" data-slot="carousel-content">
       <div
         className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
         {...props}
@@ -207,28 +221,39 @@ function CarouselNext({
   );
 }
 
+function useEmblaDotsState(api: CarouselApi) {
+  const subscribe = React.useCallback(
+    (callback: () => void) => {
+      if (!api) return () => {};
+      api.on("init", callback);
+      api.on("reInit", callback);
+      api.on("select", callback);
+      return () => {
+        api.off("init", callback);
+        api.off("reInit", callback);
+        api.off("select", callback);
+      };
+    },
+    [api],
+  );
+
+  const scrollSnaps = React.useSyncExternalStore(
+    subscribe,
+    () => api?.scrollSnapList() ?? [],
+    () => [],
+  );
+  const selectedIndex = React.useSyncExternalStore(
+    subscribe,
+    () => api?.selectedScrollSnap() ?? 0,
+    () => 0,
+  );
+
+  return { scrollSnaps, selectedIndex };
+}
+
 function CarouselDots({ className }: { className?: string }) {
   const { api } = useCarousel();
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [scrollSnaps, setScrollSnaps] = React.useState<number[]>(() => api?.scrollSnapList() ?? []);
-
-  React.useEffect(() => {
-    if (!api) return;
-
-    const onSelect = () => setSelectedIndex(api.selectedScrollSnap());
-    const onReInit = () => {
-      setScrollSnaps(api.scrollSnapList());
-      onSelect();
-    };
-
-    api.on("reInit", onReInit);
-    api.on("select", onSelect);
-
-    return () => {
-      api.off("reInit", onReInit);
-      api.off("select", onSelect);
-    };
-  }, [api]);
+  const { scrollSnaps, selectedIndex } = useEmblaDotsState(api);
 
   return (
     <div className={cn("flex items-center justify-center gap-1.5", className)}>
@@ -237,13 +262,28 @@ function CarouselDots({ className }: { className?: string }) {
           key={index}
           onClick={() => api?.scrollTo(index)}
           className={cn(
-            "h-1.5 rounded-full transition-all",
-            index === selectedIndex ? "w-4 bg-primary" : "w-1.5 bg-border",
+            "h-2 rounded-full transition-all",
+            index === selectedIndex ? "w-6 bg-primary" : "w-2 bg-border",
           )}
           aria-label={`Go to slide ${index + 1}`}
         />
       ))}
     </div>
+  );
+}
+
+function CarouselFade({ className }: { className?: string }) {
+  const { canScrollNext } = useCarousel();
+
+  if (!canScrollNext) return null;
+
+  return (
+    <div
+      className={cn(
+        "pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent",
+        className,
+      )}
+    />
   );
 }
 
@@ -255,5 +295,6 @@ export {
   CarouselPrevious,
   CarouselNext,
   CarouselDots,
+  CarouselFade,
   useCarousel,
 };

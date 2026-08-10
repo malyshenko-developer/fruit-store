@@ -17,7 +17,7 @@ export function ProductCard({ product, showCategory = false, actions }: Props) {
   const mainImage = product.images?.[0]?.url;
 
   return (
-    <Card className="rounded-3xl bg-surface border border-border overflow-hidden flex-[0_0_320px] py-0 gap-0 transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_12px_32px_-8px_var(--primary)]/30">
+    <Card className="rounded-3xl bg-surface border border-border overflow-hidden w-[320px] shrink-0 py-0 gap-0 transition-transform hover:-translate-y-1">
       <Link href={`/products/${product.product_id}`} className="block">
         <div className="relative aspect-[1] bg-stripe1">
           {mainImage && (
