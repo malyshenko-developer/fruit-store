@@ -4,9 +4,11 @@ import { categoryFilterConfig, CategoryFilters } from "@/features/filter-product
 import { Pagination } from "@/features/paginate-products";
 
 import { getCategoryBySlug } from "@/entities/category";
-import { getProductFilters, getProducts } from "@/entities/product";
+import { getProductFilters, getProducts, ProductCard } from "@/entities/product";
 
 import { SortSelect } from "./SortSelect";
+import { Providers } from "@/app/providers";
+import { AddToCartButton } from "@/features/add-to-cart";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -61,9 +63,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       {/*  <CategoryFilters categorySlug={slug} availableAttributes={filters.attributes} />*/}
       {/*</aside>*/}
       <div className="flex-1">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <p className="text-sm text-muted-foreground mb-4">{paginatedProducts.total} товаров</p>
+        <div className="flex flex-wrap gap-6">
           {paginatedProducts.items.map((product) => (
-            <div key={product.variant_id}>{product.name}</div>
+            <ProductCard
+              key={product.variant_id}
+              product={product}
+              actions={<AddToCartButton variantId={product.variant_id} />}
+            />
           ))}
         </div>
         <Pagination
