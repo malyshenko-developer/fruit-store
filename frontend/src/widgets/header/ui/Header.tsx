@@ -11,7 +11,7 @@ import { Button } from "@/shared/ui/button";
 
 export function Header() {
   return (
-    <header className="border-b border-border">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-[60px] py-4 flex items-center justify-between">
         <Link
           href="/"
