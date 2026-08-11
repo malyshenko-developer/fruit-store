@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 
-import { SortSelect } from "@/features/sort-products";
 import { categoryFilterConfig, CategoryFilters } from "@/features/filter-products";
 import { Pagination } from "@/features/paginate-products";
 
 import { getCategoryBySlug } from "@/entities/category";
 import { getProductFilters, getProducts } from "@/entities/product";
+
+import { SortSelect } from "./SortSelect";
 
 interface Props {
   params: Promise<{ slug: string }>;
