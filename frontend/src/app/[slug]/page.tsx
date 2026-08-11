@@ -1,14 +1,13 @@
 import { notFound } from "next/navigation";
 
 import { categoryFilterConfig, CategoryFilters } from "@/features/filter-products";
-import { Pagination } from "@/features/paginate-products";
+import { AddToCartButton } from "@/features/add-to-cart";
 
 import { getCategoryBySlug } from "@/entities/category";
 import { getProductFilters, getProducts, ProductCard } from "@/entities/product";
 
 import { SortSelect } from "./SortSelect";
-import { Providers } from "@/app/providers";
-import { AddToCartButton } from "@/features/add-to-cart";
+import { CatalogPagination } from "./CatalogPagination";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -63,8 +62,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       {/*  <CategoryFilters categorySlug={slug} availableAttributes={filters.attributes} />*/}
       {/*</aside>*/}
       <div className="flex-1">
-        <p className="text-sm text-muted-foreground mb-4">{paginatedProducts.total} товаров</p>
-        <div className="flex flex-wrap gap-6">
+        <p className="text-sm text-muted-foreground mb-5">{paginatedProducts.total} товаров</p>
+        <div className="flex flex-wrap gap-5">
           {paginatedProducts.items.map((product) => (
             <ProductCard
               key={product.variant_id}
@@ -73,7 +72,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             />
           ))}
         </div>
-        <Pagination
+        <CatalogPagination
           currentPage={paginatedProducts.page}
           totalPages={paginatedProducts.total_pages}
           searchParams={sp}
