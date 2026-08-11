@@ -51,15 +51,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     getProductFilters(category.id),
   ]);
   return (
-    <div className="p-8 flex gap-8">
-      <aside className="w-48 shrink-0">
-        <CategoryFilters categorySlug={slug} availableAttributes={filters.attributes} />
-      </aside>
+    <div className="pt-8 pb-[96px]">
+      <div className="flex items-center justify-between mb-7 gap-[16px]">
+        <h1 className="text-[34px] tracking-[-0.02em] font-bold">{category.name}</h1>
+        <SortSelect />
+      </div>
+      {/*<aside className="w-48 shrink-0">*/}
+      {/*  <CategoryFilters categorySlug={slug} availableAttributes={filters.attributes} />*/}
+      {/*</aside>*/}
       <div className="flex-1">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">{category.name}</h1>
-          <SortSelect />
-        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {paginatedProducts.items.map((product) => (
             <div key={product.variant_id}>{product.name}</div>

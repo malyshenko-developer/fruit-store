@@ -11,6 +11,7 @@
     --border: oklch(0 0 0 / 0.09);
     --muted-foreground: oklch(0.45 0.01 260);
     --stripe1: oklch(0.94 0.003 260);
+    --surface-hover: oklch(0.96 0.003 260);
 
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.18 0.006 260);
@@ -42,6 +43,7 @@
     --border: oklch(1 0 0 / 0.09);
     --muted-foreground: oklch(0.68 0.01 260);
     --stripe1: oklch(0.23 0.006 260);
+    --surface-hover: oklch(0.24 0.006 260);
 
     --card: oklch(0.195 0.006 260);
     --card-foreground: oklch(0.97 0.002 260);
@@ -71,6 +73,7 @@
     --color-border: var(--border);
     --color-muted-foreground: var(--muted-foreground);
     --color-stripe1: var(--stripe1);
+    --color-surface-hover: var(--surface-hover);
     --font-sans: var(--font-sans);
 
     --color-card: var(--card);

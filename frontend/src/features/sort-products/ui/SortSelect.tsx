@@ -1,46 +1,53 @@
 "use client";
 
-import {ChangeEvent} from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+
 const options = [
-    { value: "", label: "Newest" },
-    { value: "price-asc", label: "Price: Low to High" },
-    { value: "price-desc", label: "Price: High to Low" },
+  { value: "newest", label: "Сначала новые" },
+  { value: "price-asc", label: "Сначала дешевле" },
+  { value: "price-desc", label: "Сначала дороже" },
 ];
 
 export function SortSelect() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-    const currentSortBy = searchParams.get("sort_by") ?? "";
-    const currentOrder = searchParams.get("order") ?? "";
-    const currentValue = currentSortBy ? `${currentSortBy}-${currentOrder}` : "";
+  const currentSortBy = searchParams.get("sort_by") ?? "";
+  const currentOrder = searchParams.get("order") ?? "";
+  const currentValue = currentSortBy ? `${currentSortBy}-${currentOrder}` : "newest";
 
-    function handleChange(e: ChangeEvent<HTMLSelectElement>) {
-        const value = e.target.value;
-        const params = new URLSearchParams(searchParams.toString());
+  function handleChange(value: string | null) {
+    const params = new URLSearchParams(searchParams.toString());
 
-        if (!value) {
-            params.delete("sort_by");
-            params.delete("order");
-        } else {
-            const [sortBy, order] = value.split("-");
-            params.set("sort_by", sortBy);
-            params.set("order", order);
-        }
-
-        router.push(`${pathname}?${params.toString()}`);
+    if (!value || value === "newest") {
+      params.delete("sort_by");
+      params.delete("order");
+    } else {
+      const [sortBy, order] = value.split("-");
+      params.set("sort_by", sortBy);
+      params.set("order", order);
     }
 
-    return (
-        <select value={currentValue} onChange={handleChange} className="border rounded px-2 py-1">
-            {options.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                </option>
-            ))}
-        </select>
-    );
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <Select value={currentValue} onValueChange={handleChange}>
+      <SelectTrigger className="w-[200px]">
+        <SelectValue>
+          {() => options.find((opt) => opt.value === currentValue)?.label ?? "Сначала новые"}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt) => (
+          <SelectItem key={opt.value} value={opt.value}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }
