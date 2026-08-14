@@ -58,25 +58,31 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <h1 className="text-[34px] tracking-[-0.02em] font-bold">{category.name}</h1>
         <SortSelect />
       </div>
-      {/*<aside className="w-48 shrink-0">*/}
-      {/*  <CategoryFilters categorySlug={slug} availableAttributes={filters.attributes} />*/}
-      {/*</aside>*/}
-      <div className="flex-1">
-        <p className="text-sm text-muted-foreground mb-5">{paginatedProducts.total} товаров</p>
-        <div className="flex flex-wrap gap-5">
-          {paginatedProducts.items.map((product) => (
-            <ProductCard
-              key={product.variant_id}
-              product={product}
-              actions={<AddToCartButton variantId={product.variant_id} />}
-            />
-          ))}
+      <div className="flex gap-8">
+        <aside className="w-[264px] shrink-0 sticky top-24 self-start">
+          <CategoryFilters
+            categorySlug={slug}
+            availableAttributes={filters.attributes}
+            priceRange={filters.price_range}
+          />
+        </aside>
+        <div className="flex-1">
+          <p className="text-sm text-muted-foreground mb-5">{paginatedProducts.total} товаров</p>
+          <div className="flex flex-wrap gap-5">
+            {paginatedProducts.items.map((product) => (
+              <ProductCard
+                key={product.variant_id}
+                product={product}
+                actions={<AddToCartButton variantId={product.variant_id} />}
+              />
+            ))}
+          </div>
+          <CatalogPagination
+            currentPage={paginatedProducts.page}
+            totalPages={paginatedProducts.total_pages}
+            searchParams={sp}
+          />
         </div>
-        <CatalogPagination
-          currentPage={paginatedProducts.page}
-          totalPages={paginatedProducts.total_pages}
-          searchParams={sp}
-        />
       </div>
     </div>
   );

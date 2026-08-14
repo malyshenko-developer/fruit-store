@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { getPageNumbers } from "@/shared/lib/pagination";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {

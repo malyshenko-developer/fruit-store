@@ -4,41 +4,48 @@ import { ColorFilter } from "./ColorFilter";
 import { RangeFilter } from "./RangeFilter";
 
 interface Props {
-    categorySlug: string;
-    availableAttributes: Record<string, string[]>;
+  categorySlug: string;
+  availableAttributes: Record<string, string[]>;
+  priceRange: { min: number; max: number };
 }
 
-export function CategoryFilters({ categorySlug, availableAttributes }: Props) {
-    const fields = categoryFilterConfig[categorySlug] ?? [];
+export function CategoryFilters({ categorySlug, availableAttributes, priceRange }: Props) {
+  const fields = categoryFilterConfig[categorySlug] ?? [];
 
-    return (
-        <div className="space-y-6">
-            <RangeFilter minParam="min_price" maxParam="max_price" label="Price" unit="$" />
-            <RangeFilter minParam="min_screen_size" maxParam="max_screen_size" label="Screen Size" unit="inches" />
+  return (
+    <div className="space-y-6">
+      <RangeFilter
+        minParam="min_price"
+        maxParam="max_price"
+        label="Цена"
+        absoluteMin={priceRange.min}
+        absoluteMax={priceRange.max}
+      />
+      {/*<RangeFilter minParam="min_screen_size" maxParam="max_screen_size" label="Screen Size" unit="inches" />*/}
 
-            {fields.map((field) => {
-                const options = availableAttributes[field.paramName] ?? [];
+      {fields.map((field) => {
+        const options = availableAttributes[field.paramName] ?? [];
 
-                if (field.type === "color") {
-                    return (
-                        <ColorFilter
-                            key={field.paramName}
-                            paramName={field.paramName}
-                            label={field.label}
-                            options={options}
-                        />
-                    );
-                }
+        if (field.type === "color") {
+          return (
+            <ColorFilter
+              key={field.paramName}
+              paramName={field.paramName}
+              label={field.label}
+              options={options}
+            />
+          );
+        }
 
-                return (
-                    <AttributeFilter
-                        key={field.paramName}
-                        paramName={field.paramName}
-                        label={field.label}
-                        options={options}
-                    />
-                );
-            })}
-        </div>
-    );
+        return (
+          <AttributeFilter
+            key={field.paramName}
+            paramName={field.paramName}
+            label={field.label}
+            options={options}
+          />
+        );
+      })}
+    </div>
+  );
 }
