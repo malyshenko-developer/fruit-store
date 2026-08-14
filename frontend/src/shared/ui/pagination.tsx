@@ -48,14 +48,7 @@ function PaginationLink({ className, isActive, size = "icon", ...props }: Pagina
         className,
       )}
       nativeButton={false}
-      render={
-        <a
-          aria-current={isActive ? "page" : undefined}
-          data-slot="pagination-link"
-          data-active={isActive}
-          {...props}
-        />
-      }
+      render={<a aria-current={isActive ? "page" : undefined} data-active={isActive} {...props} />}
     />
   );
 }
