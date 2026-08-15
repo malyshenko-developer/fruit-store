@@ -69,7 +69,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </aside>
         <div className="flex-1">
           <p className="text-sm text-muted-foreground mb-5">{paginatedProducts.total} товаров</p>
-          <div className="flex flex-wrap gap-5">
+          <div className="flex flex-wrap gap-5 justify-center">
             {paginatedProducts.items.map((product) => (
               <ProductCard
                 key={product.variant_id}
