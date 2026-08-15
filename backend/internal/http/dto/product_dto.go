@@ -90,12 +90,14 @@ type PriceRangeResponse struct {
 
 type ProductFiltersResponse struct {
 	Attributes map[string][]string `json:"attributes"`
+	Colors     map[string]string   `json:"colors"`
 	PriceRange PriceRangeResponse  `json:"price_range"`
 }
 
 func ProductFiltersToResponse(f *model.ProductFilters) *ProductFiltersResponse {
 	return &ProductFiltersResponse{
 		Attributes: f.Attributes,
+		Colors:     f.Colors,
 		PriceRange: PriceRangeResponse{
 			Min: f.MinPrice,
 			Max: f.MaxPrice,

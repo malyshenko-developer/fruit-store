@@ -204,6 +204,53 @@ func (r *ProductRepository) GetAvailableFilters(ctx context.Context, categoryID 
 		return nil, err
 	}
 
+	const colorsQuery = `
+	SELECT DISTINCT p.attributes->>'color' AS color_name, p.attributes->>'color_hex' AS color_hex
+	FROM (
+		SELECT attributes FROM product_variants pv
+		JOIN products prod ON prod.id = pv.product_id
+		WHERE ($1::bigint IS NULL OR prod.category_id = $1) AND pv.attributes ? 'color'
+	) p
+
+	UNION
+
+	SELECT DISTINCT p.attributes->>'case_color' AS color_name, p.attributes->>'color_hex' AS color_hex
+	FROM (
+		SELECT attributes FROM product_variants pv
+		JOIN products prod ON prod.id = pv.product_id
+		WHERE ($1::bigint IS NULL OR prod.category_id = $1) AND pv.attributes ? 'case_color'
+	) p
+
+	UNION
+
+	SELECT DISTINCT p.attributes->>'band_color' AS color_name, p.attributes->>'band_color_hex' AS color_hex
+	FROM (
+		SELECT attributes FROM product_variants pv
+		JOIN products prod ON prod.id = pv.product_id
+		WHERE ($1::bigint IS NULL OR prod.category_id = $1) AND pv.attributes ? 'band_color'
+	) p`
+
+	colorRows, err := r.pool.Query(ctx, colorsQuery, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer colorRows.Close()
+
+	colors := make(map[string]string)
+	for colorRows.Next() {
+		var colorName string
+		var colorHex *string
+		if err := colorRows.Scan(&colorName, &colorHex); err != nil {
+			return nil, err
+		}
+		if colorHex != nil {
+			colors[colorName] = *colorHex
+		}
+	}
+	if err := colorRows.Err(); err != nil {
+		return nil, err
+	}
+
 	const priceQuery = `
 		SELECT COALESCE(MIN(pv.price), 0), COALESCE(MAX(pv.price), 0)
 		FROM product_variants pv
@@ -217,6 +264,7 @@ func (r *ProductRepository) GetAvailableFilters(ctx context.Context, categoryID 
 
 	return &model.ProductFilters{
 		Attributes: attributes,
+		Colors:     colors,
 		MinPrice:   minPrice,
 		MaxPrice:   maxPrice,
 	}, nil
