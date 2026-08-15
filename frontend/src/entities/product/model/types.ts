@@ -30,6 +30,7 @@ export interface ProductDetail {
 
 export interface ProductFilters {
   attributes: Record<string, string[]>;
+  colors: Record<string, string>;
   price_range: { min: number; max: number };
 }
 

@@ -6,10 +6,11 @@ import { RangeFilter } from "./RangeFilter";
 interface Props {
   categorySlug: string;
   availableAttributes: Record<string, string[]>;
+  colors: Record<string, string>;
   priceRange: { min: number; max: number };
 }
 
-export function CategoryFilters({ categorySlug, availableAttributes, priceRange }: Props) {
+export function CategoryFilters({ categorySlug, availableAttributes, colors, priceRange }: Props) {
   const fields = categoryFilterConfig[categorySlug] ?? [];
 
   return (
@@ -33,6 +34,7 @@ export function CategoryFilters({ categorySlug, availableAttributes, priceRange 
               paramName={field.paramName}
               label={field.label}
               options={options}
+              colors={colors}
             />
           );
         }

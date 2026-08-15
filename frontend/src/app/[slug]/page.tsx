@@ -63,6 +63,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <CategoryFilters
             categorySlug={slug}
             availableAttributes={filters.attributes}
+            colors={filters.colors}
             priceRange={filters.price_range}
           />
         </aside>
