@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
+import { SlidersHorizontal } from "lucide-react";
 
 import { categoryFilterConfig, CategoryFilters } from "@/features/filter-products";
 import { AddToCartButton } from "@/features/add-to-cart";
 
 import { getCategoryBySlug } from "@/entities/category";
 import { getProductFilters, getProducts, ProductCard } from "@/entities/product";
+
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/shared/ui/sheet";
+import { Button } from "@/shared/ui/button";
 
 import { SortSelect } from "./SortSelect";
 import { CatalogPagination } from "./CatalogPagination";
@@ -54,12 +58,40 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   ]);
   return (
     <div className="pt-8 pb-[96px]">
-      <div className="flex items-center justify-between mb-7 gap-[16px]">
-        <h1 className="text-[34px] tracking-[-0.02em] font-bold">{category.name}</h1>
-        <SortSelect />
+      <div className="flex flex-wrap items-center justify-between mb-7 gap-4">
+        <h1 className="text-2xl sm:text-[34px] tracking-[-0.02em] font-bold">{category.name}</h1>
+        <div className="flex items-center gap-3">
+          <div className="lg:hidden">
+            <Sheet>
+              <SheetTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    className="rounded-full gap-2 h-auto py-2.5 px-4 bg-surface hover:bg-surface-hover"
+                  />
+                }
+              >
+                <SlidersHorizontal className="size-4" />
+                <span className="text-[15px] font-semibold">Фильтры</span>
+              </SheetTrigger>
+              <SheetContent side="bottom">
+                <SheetHeader>
+                  <SheetTitle>Фильтры</SheetTitle>
+                </SheetHeader>
+                <CategoryFilters
+                  categorySlug={slug}
+                  availableAttributes={filters.attributes}
+                  colors={filters.colors}
+                  priceRange={filters.price_range}
+                />
+              </SheetContent>
+            </Sheet>
+          </div>
+          <SortSelect />
+        </div>
       </div>
       <div className="flex gap-8">
-        <aside className="w-[264px] shrink-0 sticky top-24 self-start">
+        <aside className="hidden lg:block w-[264px] shrink-0 sticky top-24 self-start">
           <CategoryFilters
             categorySlug={slug}
             availableAttributes={filters.attributes}
@@ -67,14 +99,16 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             priceRange={filters.price_range}
           />
         </aside>
+
         <div className="flex-1">
           <p className="text-sm text-muted-foreground mb-5">{paginatedProducts.total} товаров</p>
-          <div className="flex flex-wrap gap-5 justify-center">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
             {paginatedProducts.items.map((product) => (
               <ProductCard
                 key={product.variant_id}
                 product={product}
                 actions={<AddToCartButton variantId={product.variant_id} />}
+                className="w-full"
               />
             ))}
           </div>

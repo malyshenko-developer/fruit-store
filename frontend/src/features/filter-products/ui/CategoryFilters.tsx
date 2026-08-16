@@ -22,7 +22,6 @@ export function CategoryFilters({ categorySlug, availableAttributes, colors, pri
         absoluteMin={priceRange.min}
         absoluteMax={priceRange.max}
       />
-      {/*<RangeFilter minParam="min_screen_size" maxParam="max_screen_size" label="Screen Size" unit="inches" />*/}
 
       {fields.map((field) => {
         const options = availableAttributes[field.paramName] ?? [];

@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { Card, CardContent, CardFooter } from "@/shared/ui/card";
+import { cn } from "@/shared/lib/utils";
 
 import type { ProductListItem } from "../model/types";
 import { getVariantLabel } from "../model/attributes";
@@ -11,13 +12,19 @@ interface Props {
   product: ProductListItem;
   showCategory?: boolean;
   actions?: ReactNode;
+  className?: string;
 }
 
-export function ProductCard({ product, showCategory = false, actions }: Props) {
+export function ProductCard({ product, showCategory = false, actions, className }: Props) {
   const mainImage = product.images?.[0]?.url;
 
   return (
-    <Card className="rounded-3xl bg-surface border border-border overflow-hidden w-[320px] shrink-0 py-0 gap-0 transition-transform hover:-translate-y-1">
+    <Card
+      className={cn(
+        "rounded-3xl bg-surface border border-border overflow-hidden py-0 gap-0 transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_12px_32px_-8px_var(--primary)]/30",
+        className,
+      )}
+    >
       <Link href={`/products/${product.product_id}`} className="block">
         <div className="relative aspect-[1] bg-stripe1">
           {mainImage && (

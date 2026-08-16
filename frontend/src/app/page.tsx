@@ -45,6 +45,7 @@ export default async function Home() {
                     product={product}
                     showCategory
                     actions={<AddToCartButton variantId={product.variant_id} />}
+                    className="w-[320px] shrink-0"
                   />
                 </CarouselItem>
               ))}
