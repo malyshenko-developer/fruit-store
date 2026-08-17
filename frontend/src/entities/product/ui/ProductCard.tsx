@@ -25,7 +25,10 @@ export function ProductCard({ product, showCategory = false, actions, className 
         className,
       )}
     >
-      <Link href={`/products/${product.product_id}`} className="block">
+      <Link
+        href={`/products/${product.product_id}?variant=${product.variant_id}`}
+        className="block"
+      >
         <div className="relative aspect-[1] bg-stripe1">
           {mainImage && (
             <Image
