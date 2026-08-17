@@ -38,7 +38,7 @@ export default async function Home() {
           </div>
 
           <div className="relative">
-            <CarouselContent>
+            <CarouselContent contentClassName="py-3 -my-3">
               {newArrivals.items.map((product) => (
                 <CarouselItem key={product.variant_id} className="basis-auto shrink-0">
                   <ProductCard

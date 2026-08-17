@@ -16,7 +16,7 @@ export interface ProductVariant {
   price: number;
   stock: number;
   attributes: Record<string, unknown>;
-  image_url: string | null;
+  images: { url: string; sort_order: number }[];
 }
 
 export interface ProductDetail {

@@ -21,7 +21,7 @@ export function ProductCard({ product, showCategory = false, actions, className 
   return (
     <Card
       className={cn(
-        "rounded-3xl bg-surface border border-border overflow-hidden py-0 gap-0 transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_12px_32px_-8px_var(--primary)]/30",
+        "rounded-3xl bg-surface border border-border overflow-hidden py-0 gap-0 transition-transform hover:-translate-y-1",
         className,
       )}
     >

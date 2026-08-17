@@ -1,11 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import * as React from "react";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -143,13 +144,25 @@ function Carousel({
   );
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselContent({
+  className,
+  contentClassName,
+  ...props
+}: React.ComponentProps<"div"> & { contentClassName?: string }) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden py-3 -my-3" data-slot="carousel-content">
+    <div
+      ref={carouselRef}
+      className={cn("h-full overflow-hidden", contentClassName)}
+      data-slot="carousel-content"
+    >
       <div
-        className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
+        className={cn(
+          "flex h-full",
+          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+          className,
+        )}
         {...props}
       />
     </div>
@@ -165,7 +178,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
       aria-roledescription="slide"
       data-slot="carousel-item"
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
+        "h-full min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
         className,
       )}
@@ -288,6 +301,35 @@ function CarouselFade({ className }: { className?: string }) {
   );
 }
 
+function CarouselThumbnails({
+  images,
+  className,
+}: {
+  images: { url: string; alt?: string }[];
+  className?: string;
+}) {
+  const { api } = useCarousel();
+  const { selectedIndex } = useEmblaDotsState(api);
+
+  return (
+    <div className={cn("flex gap-3", className)}>
+      {images.map((image, index) => (
+        <button
+          key={index}
+          type="button"
+          onClick={() => api?.scrollTo(index)}
+          className={cn(
+            "relative w-[76px] h-[76px] rounded-2xl overflow-hidden shrink-0 cursor-pointer bg-stripe1 ring-2",
+            index === selectedIndex ? "ring-primary" : "ring-transparent",
+          )}
+        >
+          <Image src={image.url} alt={image.alt ?? ""} fill sizes="76px" className="object-cover" />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export {
   type CarouselApi,
   Carousel,
@@ -297,5 +339,6 @@ export {
   CarouselNext,
   CarouselDots,
   CarouselFade,
+  CarouselThumbnails,
   useCarousel,
 };
