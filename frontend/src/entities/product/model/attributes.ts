@@ -54,10 +54,10 @@ export function getAvailableValues(
   return Array.from(values);
 }
 
-export function findVariantByAttributes(
-  variants: { id: number; attributes: Record<string, unknown> }[],
+export function findVariantByAttributes<T extends { attributes: Record<string, unknown> }>(
+  variants: T[],
   targetAttributes: Record<string, string>,
-): { id: number; attributes: Record<string, unknown> } | undefined {
+): T | undefined {
   return variants.find((variant) =>
     Object.entries(targetAttributes).every(([key, value]) => variant.attributes[key] === value),
   );

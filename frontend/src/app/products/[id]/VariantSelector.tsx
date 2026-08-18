@@ -41,47 +41,81 @@ export function VariantSelector({ productId, categorySlug, variants, selectedVar
               {field.label}
             </h4>
             <div className="flex flex-wrap gap-3">
-              {field.type === "color"
-                ? values.map((value) => {
-                    const variantForColor = variants.find((v) => v.attributes[field.key] === value);
-                    const hex = variantForColor?.attributes.color_hex as string | undefined;
-                    const isSelected = selectedVariant.attributes[field.key] === value;
-                    const target = getTargetVariant(field.key, value);
+              {values.map((value) => {
+                const isSelected = selectedVariant.attributes[field.key] === value;
+                const target = getTargetVariant(field.key, value);
+                const isUnavailable = !target;
+                const isOutOfStock = target && target.stock === 0;
 
+                if (field.type === "color") {
+                  const variantForColor = variants.find((v) => v.attributes[field.key] === value);
+                  const hex = variantForColor?.attributes.color_hex as string | undefined;
+
+                  if (isUnavailable) {
                     return (
-                      <Link
+                      <span
                         key={value}
-                        href={target ? `/products/${productId}?variant=${target.id}` : "#"}
-                        title={value}
-                        className={`relative w-9 h-9 rounded-full flex items-center justify-center ring-2 ${
-                          isSelected ? "ring-primary" : "ring-transparent"
-                        }`}
+                        title={`${value} — такой комбинации нет`}
+                        className="relative w-9 h-9 rounded-full flex items-center justify-center opacity-40 cursor-not-allowed"
                       >
                         <span
-                          className="relative w-7 h-7 rounded-full box-border border border-border"
+                          className="relative w-7 h-7 rounded-full box-border border border-dashed border-border"
                           style={{ backgroundColor: hex ?? "#9ca3af" }}
                         />
-                      </Link>
+                      </span>
                     );
-                  })
-                : values.map((value) => {
-                    const isSelected = selectedVariant.attributes[field.key] === value;
-                    const target = getTargetVariant(field.key, value);
+                  }
 
-                    return (
-                      <Link
-                        key={value}
-                        href={target ? `/products/${productId}?variant=${target.id}` : "#"}
-                        className={`px-4 py-2 rounded-full border text-sm font-semibold ${
-                          isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-surface border-border text-foreground"
-                        }`}
-                      >
-                        {value}
-                      </Link>
-                    );
-                  })}
+                  return (
+                    <Link
+                      key={value}
+                      href={`/products/${productId}?variant=${target.id}`}
+                      title={isOutOfStock ? `${value} — нет в наличии` : value}
+                      className={`relative w-9 h-9 rounded-full flex items-center justify-center ring-2 ${
+                        isSelected ? "ring-primary" : "ring-transparent"
+                      }`}
+                    >
+                      <span
+                        className="relative w-7 h-7 rounded-full box-border border border-border"
+                        style={{ backgroundColor: hex ?? "#9ca3af" }}
+                      />
+                      {isOutOfStock && (
+                        <span className="absolute right-0 bottom-0 w-2 h-2 rounded-full bg-muted-foreground ring-2 ring-background" />
+                      )}
+                    </Link>
+                  );
+                }
+
+                if (isUnavailable) {
+                  return (
+                    <span
+                      key={value}
+                      title="Такой комбинации нет"
+                      className="px-4 py-2 rounded-full border border-dashed border-border text-sm font-semibold text-muted-foreground opacity-40 cursor-not-allowed"
+                    >
+                      {value}
+                    </span>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={value}
+                    href={`/products/${productId}?variant=${target.id}`}
+                    title={isOutOfStock ? "Нет в наличии" : undefined}
+                    className={`relative px-4 py-2 rounded-full border text-sm font-semibold ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-surface border-border text-foreground"
+                    }`}
+                  >
+                    {value}
+                    {isOutOfStock && (
+                      <span className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full bg-muted-foreground ring-2 ring-background" />
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         );

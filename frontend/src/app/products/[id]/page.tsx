@@ -42,7 +42,16 @@ export default async function ProductPage({ params, searchParams }: Props) {
           />
 
           <div className="mt-6">
-            <AddToCartButton variantId={selectedVariant.id} price={selectedVariant.price} />
+            {selectedVariant.stock === 0 && (
+              <p className="text-sm text-muted-foreground mb-2.5">
+                Этой комбинации сейчас нет в наличии — выберите другой вариант.
+              </p>
+            )}
+            <AddToCartButton
+              variantId={selectedVariant.id}
+              price={selectedVariant.price}
+              inStock={selectedVariant.stock > 0}
+            />
           </div>
         </div>
       </div>

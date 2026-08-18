@@ -8,15 +8,30 @@ import { cn } from "@/shared/lib/utils";
 interface Props {
   variantId: number;
   price?: number;
+  inStock?: boolean;
   className?: string;
 }
 
-export function AddToCartButton({ variantId, price, className }: Props) {
+export function AddToCartButton({ variantId, price, inStock = true, className }: Props) {
   const { mutate, isPending, isSuccess } = useAddToCart();
 
-  const handleClick = () => {
+  function handleClick() {
     mutate({ variantId, quantity: 1 });
-  };
+  }
+
+  if (!inStock) {
+    return (
+      <Button
+        disabled
+        className={cn(
+          "w-full rounded-full py-[18px] text-[17px] bg-surface-hover text-muted-foreground",
+          className,
+        )}
+      >
+        Нет в наличии
+      </Button>
+    );
+  }
 
   const label = isPending
     ? "Добавляем..."
@@ -30,7 +45,7 @@ export function AddToCartButton({ variantId, price, className }: Props) {
     <Button
       onClick={handleClick}
       disabled={isPending}
-      className={cn("w-full rounded-full font-semibold", className)}
+      className={cn("w-full rounded-full", className)}
     >
       {label}
     </Button>
