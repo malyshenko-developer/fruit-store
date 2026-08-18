@@ -39,3 +39,26 @@ export function getFullAttributes(
 
   return result;
 }
+
+export function getAvailableValues(
+  variants: { attributes: Record<string, unknown> }[],
+  key: string,
+): string[] {
+  const values = new Set<string>();
+  for (const variant of variants) {
+    const value = variant.attributes[key];
+    if (typeof value === "string") {
+      values.add(value);
+    }
+  }
+  return Array.from(values);
+}
+
+export function findVariantByAttributes(
+  variants: { id: number; attributes: Record<string, unknown> }[],
+  targetAttributes: Record<string, string>,
+): { id: number; attributes: Record<string, unknown> } | undefined {
+  return variants.find((variant) =>
+    Object.entries(targetAttributes).every(([key, value]) => variant.attributes[key] === value),
+  );
+}
