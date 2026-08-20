@@ -24,7 +24,7 @@ export function AddToCartButton({ variantId, price, inStock = true, className }:
       <Button
         disabled
         className={cn(
-          "w-full rounded-full py-[18px] text-[17px] bg-surface-hover text-muted-foreground",
+          "w-full h-auto rounded-full bg-surface-hover text-muted-foreground",
           className,
         )}
       >
@@ -45,7 +45,7 @@ export function AddToCartButton({ variantId, price, inStock = true, className }:
     <Button
       onClick={handleClick}
       disabled={isPending}
-      className={cn("w-full rounded-full", className)}
+      className={cn("w-full h-auto rounded-full", className)}
     >
       {label}
     </Button>
